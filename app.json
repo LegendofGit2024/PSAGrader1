@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "PSA Grader",
+    "slug": "psa-grader",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0e1a"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yourname.psagrader"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0e1a"
+      },
+      "package": "com.yourname.psagrader"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
