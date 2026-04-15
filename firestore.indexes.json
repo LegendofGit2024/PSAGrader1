@@ -1,0 +1,45 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "items",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "flags.for_sale", "order": "ASCENDING" },
+        { "fieldPath": "acquisition.acquired_date", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "items",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "condition.type", "order": "ASCENDING" },
+        { "fieldPath": "condition.slab.grader", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "submission_estimates",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_uid", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "meta.set_id", "order": "ASCENDING" },
+        { "fieldPath": "meta.language", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "meta.name", "order": "ASCENDING" },
+        { "fieldPath": "meta.set_id", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

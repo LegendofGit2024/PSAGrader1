@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "slab-stack-prod"
+  },
+  "targets": {},
+  "etags": {}
+}

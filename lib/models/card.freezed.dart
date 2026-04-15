@@ -1,0 +1,2349 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'card.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$EbayUsPricing {
+
+@JsonKey(name: 'last_sold_nm') double? get lastSoldNm;@JsonKey(name: 'last_sold_lp') double? get lastSoldLp;@JsonKey(name: 'volume_7d') int? get volume7d;@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? get updatedAt;
+/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EbayUsPricingCopyWith<EbayUsPricing> get copyWith => _$EbayUsPricingCopyWithImpl<EbayUsPricing>(this as EbayUsPricing, _$identity);
+
+  /// Serializes this EbayUsPricing to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayUsPricing&&(identical(other.lastSoldNm, lastSoldNm) || other.lastSoldNm == lastSoldNm)&&(identical(other.lastSoldLp, lastSoldLp) || other.lastSoldLp == lastSoldLp)&&(identical(other.volume7d, volume7d) || other.volume7d == volume7d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,lastSoldNm,lastSoldLp,volume7d,updatedAt);
+
+@override
+String toString() {
+  return 'EbayUsPricing(lastSoldNm: $lastSoldNm, lastSoldLp: $lastSoldLp, volume7d: $volume7d, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EbayUsPricingCopyWith<$Res>  {
+  factory $EbayUsPricingCopyWith(EbayUsPricing value, $Res Function(EbayUsPricing) _then) = _$EbayUsPricingCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'last_sold_nm') double? lastSoldNm,@JsonKey(name: 'last_sold_lp') double? lastSoldLp,@JsonKey(name: 'volume_7d') int? volume7d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$EbayUsPricingCopyWithImpl<$Res>
+    implements $EbayUsPricingCopyWith<$Res> {
+  _$EbayUsPricingCopyWithImpl(this._self, this._then);
+
+  final EbayUsPricing _self;
+  final $Res Function(EbayUsPricing) _then;
+
+/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? lastSoldNm = freezed,Object? lastSoldLp = freezed,Object? volume7d = freezed,Object? updatedAt = freezed,}) {
+  return _then(_self.copyWith(
+lastSoldNm: freezed == lastSoldNm ? _self.lastSoldNm : lastSoldNm // ignore: cast_nullable_to_non_nullable
+as double?,lastSoldLp: freezed == lastSoldLp ? _self.lastSoldLp : lastSoldLp // ignore: cast_nullable_to_non_nullable
+as double?,volume7d: freezed == volume7d ? _self.volume7d : volume7d // ignore: cast_nullable_to_non_nullable
+as int?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [EbayUsPricing].
+extension EbayUsPricingPatterns on EbayUsPricing {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EbayUsPricing value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EbayUsPricing() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EbayUsPricing value)  $default,){
+final _that = this;
+switch (_that) {
+case _EbayUsPricing():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EbayUsPricing value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EbayUsPricing() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EbayUsPricing() when $default != null:
+return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+switch (_that) {
+case _EbayUsPricing():
+return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+switch (_that) {
+case _EbayUsPricing() when $default != null:
+return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _EbayUsPricing implements EbayUsPricing {
+  const _EbayUsPricing({@JsonKey(name: 'last_sold_nm') this.lastSoldNm, @JsonKey(name: 'last_sold_lp') this.lastSoldLp, @JsonKey(name: 'volume_7d') this.volume7d, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
+  factory _EbayUsPricing.fromJson(Map<String, dynamic> json) => _$EbayUsPricingFromJson(json);
+
+@override@JsonKey(name: 'last_sold_nm') final  double? lastSoldNm;
+@override@JsonKey(name: 'last_sold_lp') final  double? lastSoldLp;
+@override@JsonKey(name: 'volume_7d') final  int? volume7d;
+@override@JsonKey(name: 'updated_at')@TimestampConverter() final  DateTime? updatedAt;
+
+/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EbayUsPricingCopyWith<_EbayUsPricing> get copyWith => __$EbayUsPricingCopyWithImpl<_EbayUsPricing>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$EbayUsPricingToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayUsPricing&&(identical(other.lastSoldNm, lastSoldNm) || other.lastSoldNm == lastSoldNm)&&(identical(other.lastSoldLp, lastSoldLp) || other.lastSoldLp == lastSoldLp)&&(identical(other.volume7d, volume7d) || other.volume7d == volume7d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,lastSoldNm,lastSoldLp,volume7d,updatedAt);
+
+@override
+String toString() {
+  return 'EbayUsPricing(lastSoldNm: $lastSoldNm, lastSoldLp: $lastSoldLp, volume7d: $volume7d, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EbayUsPricingCopyWith<$Res> implements $EbayUsPricingCopyWith<$Res> {
+  factory _$EbayUsPricingCopyWith(_EbayUsPricing value, $Res Function(_EbayUsPricing) _then) = __$EbayUsPricingCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'last_sold_nm') double? lastSoldNm,@JsonKey(name: 'last_sold_lp') double? lastSoldLp,@JsonKey(name: 'volume_7d') int? volume7d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$EbayUsPricingCopyWithImpl<$Res>
+    implements _$EbayUsPricingCopyWith<$Res> {
+  __$EbayUsPricingCopyWithImpl(this._self, this._then);
+
+  final _EbayUsPricing _self;
+  final $Res Function(_EbayUsPricing) _then;
+
+/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? lastSoldNm = freezed,Object? lastSoldLp = freezed,Object? volume7d = freezed,Object? updatedAt = freezed,}) {
+  return _then(_EbayUsPricing(
+lastSoldNm: freezed == lastSoldNm ? _self.lastSoldNm : lastSoldNm // ignore: cast_nullable_to_non_nullable
+as double?,lastSoldLp: freezed == lastSoldLp ? _self.lastSoldLp : lastSoldLp // ignore: cast_nullable_to_non_nullable
+as double?,volume7d: freezed == volume7d ? _self.volume7d : volume7d // ignore: cast_nullable_to_non_nullable
+as int?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$TcgplayerUsPricing {
+
+@JsonKey(name: 'market_nm') double? get marketNm;@JsonKey(name: 'market_lp') double? get marketLp;@JsonKey(name: 'market_mp') double? get marketMp;@JsonKey(name: 'market_hp') double? get marketHp;@JsonKey(name: 'market_dmg') double? get marketDmg;@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? get updatedAt;
+/// Create a copy of TcgplayerUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TcgplayerUsPricingCopyWith<TcgplayerUsPricing> get copyWith => _$TcgplayerUsPricingCopyWithImpl<TcgplayerUsPricing>(this as TcgplayerUsPricing, _$identity);
+
+  /// Serializes this TcgplayerUsPricing to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TcgplayerUsPricing&&(identical(other.marketNm, marketNm) || other.marketNm == marketNm)&&(identical(other.marketLp, marketLp) || other.marketLp == marketLp)&&(identical(other.marketMp, marketMp) || other.marketMp == marketMp)&&(identical(other.marketHp, marketHp) || other.marketHp == marketHp)&&(identical(other.marketDmg, marketDmg) || other.marketDmg == marketDmg)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,marketNm,marketLp,marketMp,marketHp,marketDmg,updatedAt);
+
+@override
+String toString() {
+  return 'TcgplayerUsPricing(marketNm: $marketNm, marketLp: $marketLp, marketMp: $marketMp, marketHp: $marketHp, marketDmg: $marketDmg, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TcgplayerUsPricingCopyWith<$Res>  {
+  factory $TcgplayerUsPricingCopyWith(TcgplayerUsPricing value, $Res Function(TcgplayerUsPricing) _then) = _$TcgplayerUsPricingCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'market_nm') double? marketNm,@JsonKey(name: 'market_lp') double? marketLp,@JsonKey(name: 'market_mp') double? marketMp,@JsonKey(name: 'market_hp') double? marketHp,@JsonKey(name: 'market_dmg') double? marketDmg,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$TcgplayerUsPricingCopyWithImpl<$Res>
+    implements $TcgplayerUsPricingCopyWith<$Res> {
+  _$TcgplayerUsPricingCopyWithImpl(this._self, this._then);
+
+  final TcgplayerUsPricing _self;
+  final $Res Function(TcgplayerUsPricing) _then;
+
+/// Create a copy of TcgplayerUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? marketNm = freezed,Object? marketLp = freezed,Object? marketMp = freezed,Object? marketHp = freezed,Object? marketDmg = freezed,Object? updatedAt = freezed,}) {
+  return _then(_self.copyWith(
+marketNm: freezed == marketNm ? _self.marketNm : marketNm // ignore: cast_nullable_to_non_nullable
+as double?,marketLp: freezed == marketLp ? _self.marketLp : marketLp // ignore: cast_nullable_to_non_nullable
+as double?,marketMp: freezed == marketMp ? _self.marketMp : marketMp // ignore: cast_nullable_to_non_nullable
+as double?,marketHp: freezed == marketHp ? _self.marketHp : marketHp // ignore: cast_nullable_to_non_nullable
+as double?,marketDmg: freezed == marketDmg ? _self.marketDmg : marketDmg // ignore: cast_nullable_to_non_nullable
+as double?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [TcgplayerUsPricing].
+extension TcgplayerUsPricingPatterns on TcgplayerUsPricing {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TcgplayerUsPricing value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TcgplayerUsPricing() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TcgplayerUsPricing value)  $default,){
+final _that = this;
+switch (_that) {
+case _TcgplayerUsPricing():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TcgplayerUsPricing value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TcgplayerUsPricing() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'market_nm')  double? marketNm, @JsonKey(name: 'market_lp')  double? marketLp, @JsonKey(name: 'market_mp')  double? marketMp, @JsonKey(name: 'market_hp')  double? marketHp, @JsonKey(name: 'market_dmg')  double? marketDmg, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TcgplayerUsPricing() when $default != null:
+return $default(_that.marketNm,_that.marketLp,_that.marketMp,_that.marketHp,_that.marketDmg,_that.updatedAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'market_nm')  double? marketNm, @JsonKey(name: 'market_lp')  double? marketLp, @JsonKey(name: 'market_mp')  double? marketMp, @JsonKey(name: 'market_hp')  double? marketHp, @JsonKey(name: 'market_dmg')  double? marketDmg, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+switch (_that) {
+case _TcgplayerUsPricing():
+return $default(_that.marketNm,_that.marketLp,_that.marketMp,_that.marketHp,_that.marketDmg,_that.updatedAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'market_nm')  double? marketNm, @JsonKey(name: 'market_lp')  double? marketLp, @JsonKey(name: 'market_mp')  double? marketMp, @JsonKey(name: 'market_hp')  double? marketHp, @JsonKey(name: 'market_dmg')  double? marketDmg, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+switch (_that) {
+case _TcgplayerUsPricing() when $default != null:
+return $default(_that.marketNm,_that.marketLp,_that.marketMp,_that.marketHp,_that.marketDmg,_that.updatedAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _TcgplayerUsPricing implements TcgplayerUsPricing {
+  const _TcgplayerUsPricing({@JsonKey(name: 'market_nm') this.marketNm, @JsonKey(name: 'market_lp') this.marketLp, @JsonKey(name: 'market_mp') this.marketMp, @JsonKey(name: 'market_hp') this.marketHp, @JsonKey(name: 'market_dmg') this.marketDmg, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
+  factory _TcgplayerUsPricing.fromJson(Map<String, dynamic> json) => _$TcgplayerUsPricingFromJson(json);
+
+@override@JsonKey(name: 'market_nm') final  double? marketNm;
+@override@JsonKey(name: 'market_lp') final  double? marketLp;
+@override@JsonKey(name: 'market_mp') final  double? marketMp;
+@override@JsonKey(name: 'market_hp') final  double? marketHp;
+@override@JsonKey(name: 'market_dmg') final  double? marketDmg;
+@override@JsonKey(name: 'updated_at')@TimestampConverter() final  DateTime? updatedAt;
+
+/// Create a copy of TcgplayerUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TcgplayerUsPricingCopyWith<_TcgplayerUsPricing> get copyWith => __$TcgplayerUsPricingCopyWithImpl<_TcgplayerUsPricing>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$TcgplayerUsPricingToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TcgplayerUsPricing&&(identical(other.marketNm, marketNm) || other.marketNm == marketNm)&&(identical(other.marketLp, marketLp) || other.marketLp == marketLp)&&(identical(other.marketMp, marketMp) || other.marketMp == marketMp)&&(identical(other.marketHp, marketHp) || other.marketHp == marketHp)&&(identical(other.marketDmg, marketDmg) || other.marketDmg == marketDmg)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,marketNm,marketLp,marketMp,marketHp,marketDmg,updatedAt);
+
+@override
+String toString() {
+  return 'TcgplayerUsPricing(marketNm: $marketNm, marketLp: $marketLp, marketMp: $marketMp, marketHp: $marketHp, marketDmg: $marketDmg, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TcgplayerUsPricingCopyWith<$Res> implements $TcgplayerUsPricingCopyWith<$Res> {
+  factory _$TcgplayerUsPricingCopyWith(_TcgplayerUsPricing value, $Res Function(_TcgplayerUsPricing) _then) = __$TcgplayerUsPricingCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'market_nm') double? marketNm,@JsonKey(name: 'market_lp') double? marketLp,@JsonKey(name: 'market_mp') double? marketMp,@JsonKey(name: 'market_hp') double? marketHp,@JsonKey(name: 'market_dmg') double? marketDmg,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$TcgplayerUsPricingCopyWithImpl<$Res>
+    implements _$TcgplayerUsPricingCopyWith<$Res> {
+  __$TcgplayerUsPricingCopyWithImpl(this._self, this._then);
+
+  final _TcgplayerUsPricing _self;
+  final $Res Function(_TcgplayerUsPricing) _then;
+
+/// Create a copy of TcgplayerUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? marketNm = freezed,Object? marketLp = freezed,Object? marketMp = freezed,Object? marketHp = freezed,Object? marketDmg = freezed,Object? updatedAt = freezed,}) {
+  return _then(_TcgplayerUsPricing(
+marketNm: freezed == marketNm ? _self.marketNm : marketNm // ignore: cast_nullable_to_non_nullable
+as double?,marketLp: freezed == marketLp ? _self.marketLp : marketLp // ignore: cast_nullable_to_non_nullable
+as double?,marketMp: freezed == marketMp ? _self.marketMp : marketMp // ignore: cast_nullable_to_non_nullable
+as double?,marketHp: freezed == marketHp ? _self.marketHp : marketHp // ignore: cast_nullable_to_non_nullable
+as double?,marketDmg: freezed == marketDmg ? _self.marketDmg : marketDmg // ignore: cast_nullable_to_non_nullable
+as double?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$CardmarketEuPricing {
+
+@JsonKey(name: 'trend_price') double? get trendPrice;@JsonKey(name: 'avg_sell_1d') double? get avgSell1d;@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? get updatedAt;
+/// Create a copy of CardmarketEuPricing
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CardmarketEuPricingCopyWith<CardmarketEuPricing> get copyWith => _$CardmarketEuPricingCopyWithImpl<CardmarketEuPricing>(this as CardmarketEuPricing, _$identity);
+
+  /// Serializes this CardmarketEuPricing to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardmarketEuPricing&&(identical(other.trendPrice, trendPrice) || other.trendPrice == trendPrice)&&(identical(other.avgSell1d, avgSell1d) || other.avgSell1d == avgSell1d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,trendPrice,avgSell1d,updatedAt);
+
+@override
+String toString() {
+  return 'CardmarketEuPricing(trendPrice: $trendPrice, avgSell1d: $avgSell1d, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CardmarketEuPricingCopyWith<$Res>  {
+  factory $CardmarketEuPricingCopyWith(CardmarketEuPricing value, $Res Function(CardmarketEuPricing) _then) = _$CardmarketEuPricingCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'trend_price') double? trendPrice,@JsonKey(name: 'avg_sell_1d') double? avgSell1d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$CardmarketEuPricingCopyWithImpl<$Res>
+    implements $CardmarketEuPricingCopyWith<$Res> {
+  _$CardmarketEuPricingCopyWithImpl(this._self, this._then);
+
+  final CardmarketEuPricing _self;
+  final $Res Function(CardmarketEuPricing) _then;
+
+/// Create a copy of CardmarketEuPricing
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? trendPrice = freezed,Object? avgSell1d = freezed,Object? updatedAt = freezed,}) {
+  return _then(_self.copyWith(
+trendPrice: freezed == trendPrice ? _self.trendPrice : trendPrice // ignore: cast_nullable_to_non_nullable
+as double?,avgSell1d: freezed == avgSell1d ? _self.avgSell1d : avgSell1d // ignore: cast_nullable_to_non_nullable
+as double?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CardmarketEuPricing].
+extension CardmarketEuPricingPatterns on CardmarketEuPricing {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CardmarketEuPricing value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CardmarketEuPricing() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CardmarketEuPricing value)  $default,){
+final _that = this;
+switch (_that) {
+case _CardmarketEuPricing():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CardmarketEuPricing value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CardmarketEuPricing() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'trend_price')  double? trendPrice, @JsonKey(name: 'avg_sell_1d')  double? avgSell1d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CardmarketEuPricing() when $default != null:
+return $default(_that.trendPrice,_that.avgSell1d,_that.updatedAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'trend_price')  double? trendPrice, @JsonKey(name: 'avg_sell_1d')  double? avgSell1d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+switch (_that) {
+case _CardmarketEuPricing():
+return $default(_that.trendPrice,_that.avgSell1d,_that.updatedAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'trend_price')  double? trendPrice, @JsonKey(name: 'avg_sell_1d')  double? avgSell1d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+switch (_that) {
+case _CardmarketEuPricing() when $default != null:
+return $default(_that.trendPrice,_that.avgSell1d,_that.updatedAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CardmarketEuPricing implements CardmarketEuPricing {
+  const _CardmarketEuPricing({@JsonKey(name: 'trend_price') this.trendPrice, @JsonKey(name: 'avg_sell_1d') this.avgSell1d, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
+  factory _CardmarketEuPricing.fromJson(Map<String, dynamic> json) => _$CardmarketEuPricingFromJson(json);
+
+@override@JsonKey(name: 'trend_price') final  double? trendPrice;
+@override@JsonKey(name: 'avg_sell_1d') final  double? avgSell1d;
+@override@JsonKey(name: 'updated_at')@TimestampConverter() final  DateTime? updatedAt;
+
+/// Create a copy of CardmarketEuPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CardmarketEuPricingCopyWith<_CardmarketEuPricing> get copyWith => __$CardmarketEuPricingCopyWithImpl<_CardmarketEuPricing>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CardmarketEuPricingToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardmarketEuPricing&&(identical(other.trendPrice, trendPrice) || other.trendPrice == trendPrice)&&(identical(other.avgSell1d, avgSell1d) || other.avgSell1d == avgSell1d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,trendPrice,avgSell1d,updatedAt);
+
+@override
+String toString() {
+  return 'CardmarketEuPricing(trendPrice: $trendPrice, avgSell1d: $avgSell1d, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CardmarketEuPricingCopyWith<$Res> implements $CardmarketEuPricingCopyWith<$Res> {
+  factory _$CardmarketEuPricingCopyWith(_CardmarketEuPricing value, $Res Function(_CardmarketEuPricing) _then) = __$CardmarketEuPricingCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'trend_price') double? trendPrice,@JsonKey(name: 'avg_sell_1d') double? avgSell1d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$CardmarketEuPricingCopyWithImpl<$Res>
+    implements _$CardmarketEuPricingCopyWith<$Res> {
+  __$CardmarketEuPricingCopyWithImpl(this._self, this._then);
+
+  final _CardmarketEuPricing _self;
+  final $Res Function(_CardmarketEuPricing) _then;
+
+/// Create a copy of CardmarketEuPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? trendPrice = freezed,Object? avgSell1d = freezed,Object? updatedAt = freezed,}) {
+  return _then(_CardmarketEuPricing(
+trendPrice: freezed == trendPrice ? _self.trendPrice : trendPrice // ignore: cast_nullable_to_non_nullable
+as double?,avgSell1d: freezed == avgSell1d ? _self.avgSell1d : avgSell1d // ignore: cast_nullable_to_non_nullable
+as double?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$YuyuteiJpPricing {
+
+@JsonKey(name: 'buy_price') double? get buyPrice;@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? get updatedAt;
+/// Create a copy of YuyuteiJpPricing
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$YuyuteiJpPricingCopyWith<YuyuteiJpPricing> get copyWith => _$YuyuteiJpPricingCopyWithImpl<YuyuteiJpPricing>(this as YuyuteiJpPricing, _$identity);
+
+  /// Serializes this YuyuteiJpPricing to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is YuyuteiJpPricing&&(identical(other.buyPrice, buyPrice) || other.buyPrice == buyPrice)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,buyPrice,updatedAt);
+
+@override
+String toString() {
+  return 'YuyuteiJpPricing(buyPrice: $buyPrice, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $YuyuteiJpPricingCopyWith<$Res>  {
+  factory $YuyuteiJpPricingCopyWith(YuyuteiJpPricing value, $Res Function(YuyuteiJpPricing) _then) = _$YuyuteiJpPricingCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'buy_price') double? buyPrice,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$YuyuteiJpPricingCopyWithImpl<$Res>
+    implements $YuyuteiJpPricingCopyWith<$Res> {
+  _$YuyuteiJpPricingCopyWithImpl(this._self, this._then);
+
+  final YuyuteiJpPricing _self;
+  final $Res Function(YuyuteiJpPricing) _then;
+
+/// Create a copy of YuyuteiJpPricing
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? buyPrice = freezed,Object? updatedAt = freezed,}) {
+  return _then(_self.copyWith(
+buyPrice: freezed == buyPrice ? _self.buyPrice : buyPrice // ignore: cast_nullable_to_non_nullable
+as double?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [YuyuteiJpPricing].
+extension YuyuteiJpPricingPatterns on YuyuteiJpPricing {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _YuyuteiJpPricing value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _YuyuteiJpPricing() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _YuyuteiJpPricing value)  $default,){
+final _that = this;
+switch (_that) {
+case _YuyuteiJpPricing():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _YuyuteiJpPricing value)?  $default,){
+final _that = this;
+switch (_that) {
+case _YuyuteiJpPricing() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'buy_price')  double? buyPrice, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _YuyuteiJpPricing() when $default != null:
+return $default(_that.buyPrice,_that.updatedAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'buy_price')  double? buyPrice, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+switch (_that) {
+case _YuyuteiJpPricing():
+return $default(_that.buyPrice,_that.updatedAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'buy_price')  double? buyPrice, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+switch (_that) {
+case _YuyuteiJpPricing() when $default != null:
+return $default(_that.buyPrice,_that.updatedAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _YuyuteiJpPricing implements YuyuteiJpPricing {
+  const _YuyuteiJpPricing({@JsonKey(name: 'buy_price') this.buyPrice, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
+  factory _YuyuteiJpPricing.fromJson(Map<String, dynamic> json) => _$YuyuteiJpPricingFromJson(json);
+
+@override@JsonKey(name: 'buy_price') final  double? buyPrice;
+@override@JsonKey(name: 'updated_at')@TimestampConverter() final  DateTime? updatedAt;
+
+/// Create a copy of YuyuteiJpPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$YuyuteiJpPricingCopyWith<_YuyuteiJpPricing> get copyWith => __$YuyuteiJpPricingCopyWithImpl<_YuyuteiJpPricing>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$YuyuteiJpPricingToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _YuyuteiJpPricing&&(identical(other.buyPrice, buyPrice) || other.buyPrice == buyPrice)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,buyPrice,updatedAt);
+
+@override
+String toString() {
+  return 'YuyuteiJpPricing(buyPrice: $buyPrice, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$YuyuteiJpPricingCopyWith<$Res> implements $YuyuteiJpPricingCopyWith<$Res> {
+  factory _$YuyuteiJpPricingCopyWith(_YuyuteiJpPricing value, $Res Function(_YuyuteiJpPricing) _then) = __$YuyuteiJpPricingCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'buy_price') double? buyPrice,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$YuyuteiJpPricingCopyWithImpl<$Res>
+    implements _$YuyuteiJpPricingCopyWith<$Res> {
+  __$YuyuteiJpPricingCopyWithImpl(this._self, this._then);
+
+  final _YuyuteiJpPricing _self;
+  final $Res Function(_YuyuteiJpPricing) _then;
+
+/// Create a copy of YuyuteiJpPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? buyPrice = freezed,Object? updatedAt = freezed,}) {
+  return _then(_YuyuteiJpPricing(
+buyPrice: freezed == buyPrice ? _self.buyPrice : buyPrice // ignore: cast_nullable_to_non_nullable
+as double?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$CardPricing {
+
+@JsonKey(name: 'ebay_us') EbayUsPricing? get ebayUs;@JsonKey(name: 'tcgplayer_us') TcgplayerUsPricing? get tcgplayerUs;@JsonKey(name: 'cardmarket_eu') CardmarketEuPricing? get cardmarketEu;@JsonKey(name: 'yuyutei_jp') YuyuteiJpPricing? get yuyuteiJp;
+/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CardPricingCopyWith<CardPricing> get copyWith => _$CardPricingCopyWithImpl<CardPricing>(this as CardPricing, _$identity);
+
+  /// Serializes this CardPricing to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardPricing&&(identical(other.ebayUs, ebayUs) || other.ebayUs == ebayUs)&&(identical(other.tcgplayerUs, tcgplayerUs) || other.tcgplayerUs == tcgplayerUs)&&(identical(other.cardmarketEu, cardmarketEu) || other.cardmarketEu == cardmarketEu)&&(identical(other.yuyuteiJp, yuyuteiJp) || other.yuyuteiJp == yuyuteiJp));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,ebayUs,tcgplayerUs,cardmarketEu,yuyuteiJp);
+
+@override
+String toString() {
+  return 'CardPricing(ebayUs: $ebayUs, tcgplayerUs: $tcgplayerUs, cardmarketEu: $cardmarketEu, yuyuteiJp: $yuyuteiJp)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CardPricingCopyWith<$Res>  {
+  factory $CardPricingCopyWith(CardPricing value, $Res Function(CardPricing) _then) = _$CardPricingCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'ebay_us') EbayUsPricing? ebayUs,@JsonKey(name: 'tcgplayer_us') TcgplayerUsPricing? tcgplayerUs,@JsonKey(name: 'cardmarket_eu') CardmarketEuPricing? cardmarketEu,@JsonKey(name: 'yuyutei_jp') YuyuteiJpPricing? yuyuteiJp
+});
+
+
+$EbayUsPricingCopyWith<$Res>? get ebayUs;$TcgplayerUsPricingCopyWith<$Res>? get tcgplayerUs;$CardmarketEuPricingCopyWith<$Res>? get cardmarketEu;$YuyuteiJpPricingCopyWith<$Res>? get yuyuteiJp;
+
+}
+/// @nodoc
+class _$CardPricingCopyWithImpl<$Res>
+    implements $CardPricingCopyWith<$Res> {
+  _$CardPricingCopyWithImpl(this._self, this._then);
+
+  final CardPricing _self;
+  final $Res Function(CardPricing) _then;
+
+/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? ebayUs = freezed,Object? tcgplayerUs = freezed,Object? cardmarketEu = freezed,Object? yuyuteiJp = freezed,}) {
+  return _then(_self.copyWith(
+ebayUs: freezed == ebayUs ? _self.ebayUs : ebayUs // ignore: cast_nullable_to_non_nullable
+as EbayUsPricing?,tcgplayerUs: freezed == tcgplayerUs ? _self.tcgplayerUs : tcgplayerUs // ignore: cast_nullable_to_non_nullable
+as TcgplayerUsPricing?,cardmarketEu: freezed == cardmarketEu ? _self.cardmarketEu : cardmarketEu // ignore: cast_nullable_to_non_nullable
+as CardmarketEuPricing?,yuyuteiJp: freezed == yuyuteiJp ? _self.yuyuteiJp : yuyuteiJp // ignore: cast_nullable_to_non_nullable
+as YuyuteiJpPricing?,
+  ));
+}
+/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EbayUsPricingCopyWith<$Res>? get ebayUs {
+    if (_self.ebayUs == null) {
+    return null;
+  }
+
+  return $EbayUsPricingCopyWith<$Res>(_self.ebayUs!, (value) {
+    return _then(_self.copyWith(ebayUs: value));
+  });
+}/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TcgplayerUsPricingCopyWith<$Res>? get tcgplayerUs {
+    if (_self.tcgplayerUs == null) {
+    return null;
+  }
+
+  return $TcgplayerUsPricingCopyWith<$Res>(_self.tcgplayerUs!, (value) {
+    return _then(_self.copyWith(tcgplayerUs: value));
+  });
+}/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CardmarketEuPricingCopyWith<$Res>? get cardmarketEu {
+    if (_self.cardmarketEu == null) {
+    return null;
+  }
+
+  return $CardmarketEuPricingCopyWith<$Res>(_self.cardmarketEu!, (value) {
+    return _then(_self.copyWith(cardmarketEu: value));
+  });
+}/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$YuyuteiJpPricingCopyWith<$Res>? get yuyuteiJp {
+    if (_self.yuyuteiJp == null) {
+    return null;
+  }
+
+  return $YuyuteiJpPricingCopyWith<$Res>(_self.yuyuteiJp!, (value) {
+    return _then(_self.copyWith(yuyuteiJp: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [CardPricing].
+extension CardPricingPatterns on CardPricing {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CardPricing value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CardPricing() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CardPricing value)  $default,){
+final _that = this;
+switch (_that) {
+case _CardPricing():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CardPricing value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CardPricing() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'ebay_us')  EbayUsPricing? ebayUs, @JsonKey(name: 'tcgplayer_us')  TcgplayerUsPricing? tcgplayerUs, @JsonKey(name: 'cardmarket_eu')  CardmarketEuPricing? cardmarketEu, @JsonKey(name: 'yuyutei_jp')  YuyuteiJpPricing? yuyuteiJp)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CardPricing() when $default != null:
+return $default(_that.ebayUs,_that.tcgplayerUs,_that.cardmarketEu,_that.yuyuteiJp);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'ebay_us')  EbayUsPricing? ebayUs, @JsonKey(name: 'tcgplayer_us')  TcgplayerUsPricing? tcgplayerUs, @JsonKey(name: 'cardmarket_eu')  CardmarketEuPricing? cardmarketEu, @JsonKey(name: 'yuyutei_jp')  YuyuteiJpPricing? yuyuteiJp)  $default,) {final _that = this;
+switch (_that) {
+case _CardPricing():
+return $default(_that.ebayUs,_that.tcgplayerUs,_that.cardmarketEu,_that.yuyuteiJp);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'ebay_us')  EbayUsPricing? ebayUs, @JsonKey(name: 'tcgplayer_us')  TcgplayerUsPricing? tcgplayerUs, @JsonKey(name: 'cardmarket_eu')  CardmarketEuPricing? cardmarketEu, @JsonKey(name: 'yuyutei_jp')  YuyuteiJpPricing? yuyuteiJp)?  $default,) {final _that = this;
+switch (_that) {
+case _CardPricing() when $default != null:
+return $default(_that.ebayUs,_that.tcgplayerUs,_that.cardmarketEu,_that.yuyuteiJp);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CardPricing implements CardPricing {
+  const _CardPricing({@JsonKey(name: 'ebay_us') this.ebayUs, @JsonKey(name: 'tcgplayer_us') this.tcgplayerUs, @JsonKey(name: 'cardmarket_eu') this.cardmarketEu, @JsonKey(name: 'yuyutei_jp') this.yuyuteiJp});
+  factory _CardPricing.fromJson(Map<String, dynamic> json) => _$CardPricingFromJson(json);
+
+@override@JsonKey(name: 'ebay_us') final  EbayUsPricing? ebayUs;
+@override@JsonKey(name: 'tcgplayer_us') final  TcgplayerUsPricing? tcgplayerUs;
+@override@JsonKey(name: 'cardmarket_eu') final  CardmarketEuPricing? cardmarketEu;
+@override@JsonKey(name: 'yuyutei_jp') final  YuyuteiJpPricing? yuyuteiJp;
+
+/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CardPricingCopyWith<_CardPricing> get copyWith => __$CardPricingCopyWithImpl<_CardPricing>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CardPricingToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardPricing&&(identical(other.ebayUs, ebayUs) || other.ebayUs == ebayUs)&&(identical(other.tcgplayerUs, tcgplayerUs) || other.tcgplayerUs == tcgplayerUs)&&(identical(other.cardmarketEu, cardmarketEu) || other.cardmarketEu == cardmarketEu)&&(identical(other.yuyuteiJp, yuyuteiJp) || other.yuyuteiJp == yuyuteiJp));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,ebayUs,tcgplayerUs,cardmarketEu,yuyuteiJp);
+
+@override
+String toString() {
+  return 'CardPricing(ebayUs: $ebayUs, tcgplayerUs: $tcgplayerUs, cardmarketEu: $cardmarketEu, yuyuteiJp: $yuyuteiJp)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CardPricingCopyWith<$Res> implements $CardPricingCopyWith<$Res> {
+  factory _$CardPricingCopyWith(_CardPricing value, $Res Function(_CardPricing) _then) = __$CardPricingCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'ebay_us') EbayUsPricing? ebayUs,@JsonKey(name: 'tcgplayer_us') TcgplayerUsPricing? tcgplayerUs,@JsonKey(name: 'cardmarket_eu') CardmarketEuPricing? cardmarketEu,@JsonKey(name: 'yuyutei_jp') YuyuteiJpPricing? yuyuteiJp
+});
+
+
+@override $EbayUsPricingCopyWith<$Res>? get ebayUs;@override $TcgplayerUsPricingCopyWith<$Res>? get tcgplayerUs;@override $CardmarketEuPricingCopyWith<$Res>? get cardmarketEu;@override $YuyuteiJpPricingCopyWith<$Res>? get yuyuteiJp;
+
+}
+/// @nodoc
+class __$CardPricingCopyWithImpl<$Res>
+    implements _$CardPricingCopyWith<$Res> {
+  __$CardPricingCopyWithImpl(this._self, this._then);
+
+  final _CardPricing _self;
+  final $Res Function(_CardPricing) _then;
+
+/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? ebayUs = freezed,Object? tcgplayerUs = freezed,Object? cardmarketEu = freezed,Object? yuyuteiJp = freezed,}) {
+  return _then(_CardPricing(
+ebayUs: freezed == ebayUs ? _self.ebayUs : ebayUs // ignore: cast_nullable_to_non_nullable
+as EbayUsPricing?,tcgplayerUs: freezed == tcgplayerUs ? _self.tcgplayerUs : tcgplayerUs // ignore: cast_nullable_to_non_nullable
+as TcgplayerUsPricing?,cardmarketEu: freezed == cardmarketEu ? _self.cardmarketEu : cardmarketEu // ignore: cast_nullable_to_non_nullable
+as CardmarketEuPricing?,yuyuteiJp: freezed == yuyuteiJp ? _self.yuyuteiJp : yuyuteiJp // ignore: cast_nullable_to_non_nullable
+as YuyuteiJpPricing?,
+  ));
+}
+
+/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EbayUsPricingCopyWith<$Res>? get ebayUs {
+    if (_self.ebayUs == null) {
+    return null;
+  }
+
+  return $EbayUsPricingCopyWith<$Res>(_self.ebayUs!, (value) {
+    return _then(_self.copyWith(ebayUs: value));
+  });
+}/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TcgplayerUsPricingCopyWith<$Res>? get tcgplayerUs {
+    if (_self.tcgplayerUs == null) {
+    return null;
+  }
+
+  return $TcgplayerUsPricingCopyWith<$Res>(_self.tcgplayerUs!, (value) {
+    return _then(_self.copyWith(tcgplayerUs: value));
+  });
+}/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CardmarketEuPricingCopyWith<$Res>? get cardmarketEu {
+    if (_self.cardmarketEu == null) {
+    return null;
+  }
+
+  return $CardmarketEuPricingCopyWith<$Res>(_self.cardmarketEu!, (value) {
+    return _then(_self.copyWith(cardmarketEu: value));
+  });
+}/// Create a copy of CardPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$YuyuteiJpPricingCopyWith<$Res>? get yuyuteiJp {
+    if (_self.yuyuteiJp == null) {
+    return null;
+  }
+
+  return $YuyuteiJpPricingCopyWith<$Res>(_self.yuyuteiJp!, (value) {
+    return _then(_self.copyWith(yuyuteiJp: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$PsaPop {
+
+@JsonKey(name: 'total_pop') int? get totalPop;@JsonKey(name: 'pop_10') int? get pop10;@JsonKey(name: 'pop_9') int? get pop9;@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? get updatedAt;
+/// Create a copy of PsaPop
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PsaPopCopyWith<PsaPop> get copyWith => _$PsaPopCopyWithImpl<PsaPop>(this as PsaPop, _$identity);
+
+  /// Serializes this PsaPop to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PsaPop&&(identical(other.totalPop, totalPop) || other.totalPop == totalPop)&&(identical(other.pop10, pop10) || other.pop10 == pop10)&&(identical(other.pop9, pop9) || other.pop9 == pop9)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,totalPop,pop10,pop9,updatedAt);
+
+@override
+String toString() {
+  return 'PsaPop(totalPop: $totalPop, pop10: $pop10, pop9: $pop9, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PsaPopCopyWith<$Res>  {
+  factory $PsaPopCopyWith(PsaPop value, $Res Function(PsaPop) _then) = _$PsaPopCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'total_pop') int? totalPop,@JsonKey(name: 'pop_10') int? pop10,@JsonKey(name: 'pop_9') int? pop9,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$PsaPopCopyWithImpl<$Res>
+    implements $PsaPopCopyWith<$Res> {
+  _$PsaPopCopyWithImpl(this._self, this._then);
+
+  final PsaPop _self;
+  final $Res Function(PsaPop) _then;
+
+/// Create a copy of PsaPop
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? totalPop = freezed,Object? pop10 = freezed,Object? pop9 = freezed,Object? updatedAt = freezed,}) {
+  return _then(_self.copyWith(
+totalPop: freezed == totalPop ? _self.totalPop : totalPop // ignore: cast_nullable_to_non_nullable
+as int?,pop10: freezed == pop10 ? _self.pop10 : pop10 // ignore: cast_nullable_to_non_nullable
+as int?,pop9: freezed == pop9 ? _self.pop9 : pop9 // ignore: cast_nullable_to_non_nullable
+as int?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [PsaPop].
+extension PsaPopPatterns on PsaPop {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PsaPop value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PsaPop() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PsaPop value)  $default,){
+final _that = this;
+switch (_that) {
+case _PsaPop():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PsaPop value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PsaPop() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'total_pop')  int? totalPop, @JsonKey(name: 'pop_10')  int? pop10, @JsonKey(name: 'pop_9')  int? pop9, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PsaPop() when $default != null:
+return $default(_that.totalPop,_that.pop10,_that.pop9,_that.updatedAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'total_pop')  int? totalPop, @JsonKey(name: 'pop_10')  int? pop10, @JsonKey(name: 'pop_9')  int? pop9, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+switch (_that) {
+case _PsaPop():
+return $default(_that.totalPop,_that.pop10,_that.pop9,_that.updatedAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'total_pop')  int? totalPop, @JsonKey(name: 'pop_10')  int? pop10, @JsonKey(name: 'pop_9')  int? pop9, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+switch (_that) {
+case _PsaPop() when $default != null:
+return $default(_that.totalPop,_that.pop10,_that.pop9,_that.updatedAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _PsaPop implements PsaPop {
+  const _PsaPop({@JsonKey(name: 'total_pop') this.totalPop, @JsonKey(name: 'pop_10') this.pop10, @JsonKey(name: 'pop_9') this.pop9, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
+  factory _PsaPop.fromJson(Map<String, dynamic> json) => _$PsaPopFromJson(json);
+
+@override@JsonKey(name: 'total_pop') final  int? totalPop;
+@override@JsonKey(name: 'pop_10') final  int? pop10;
+@override@JsonKey(name: 'pop_9') final  int? pop9;
+@override@JsonKey(name: 'updated_at')@TimestampConverter() final  DateTime? updatedAt;
+
+/// Create a copy of PsaPop
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PsaPopCopyWith<_PsaPop> get copyWith => __$PsaPopCopyWithImpl<_PsaPop>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$PsaPopToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PsaPop&&(identical(other.totalPop, totalPop) || other.totalPop == totalPop)&&(identical(other.pop10, pop10) || other.pop10 == pop10)&&(identical(other.pop9, pop9) || other.pop9 == pop9)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,totalPop,pop10,pop9,updatedAt);
+
+@override
+String toString() {
+  return 'PsaPop(totalPop: $totalPop, pop10: $pop10, pop9: $pop9, updatedAt: $updatedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PsaPopCopyWith<$Res> implements $PsaPopCopyWith<$Res> {
+  factory _$PsaPopCopyWith(_PsaPop value, $Res Function(_PsaPop) _then) = __$PsaPopCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'total_pop') int? totalPop,@JsonKey(name: 'pop_10') int? pop10,@JsonKey(name: 'pop_9') int? pop9,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$PsaPopCopyWithImpl<$Res>
+    implements _$PsaPopCopyWith<$Res> {
+  __$PsaPopCopyWithImpl(this._self, this._then);
+
+  final _PsaPop _self;
+  final $Res Function(_PsaPop) _then;
+
+/// Create a copy of PsaPop
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? totalPop = freezed,Object? pop10 = freezed,Object? pop9 = freezed,Object? updatedAt = freezed,}) {
+  return _then(_PsaPop(
+totalPop: freezed == totalPop ? _self.totalPop : totalPop // ignore: cast_nullable_to_non_nullable
+as int?,pop10: freezed == pop10 ? _self.pop10 : pop10 // ignore: cast_nullable_to_non_nullable
+as int?,pop9: freezed == pop9 ? _self.pop9 : pop9 // ignore: cast_nullable_to_non_nullable
+as int?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$CardMeta {
+
+ String get name;@JsonKey(name: 'set_id') String get setId;@JsonKey(name: 'set_number') String get setNumber;@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage get language; String get variant;@JsonKey(name: 'image_url') String get imageUrl;
+/// Create a copy of CardMeta
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CardMetaCopyWith<CardMeta> get copyWith => _$CardMetaCopyWithImpl<CardMeta>(this as CardMeta, _$identity);
+
+  /// Serializes this CardMeta to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl);
+
+@override
+String toString() {
+  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CardMetaCopyWith<$Res>  {
+  factory $CardMetaCopyWith(CardMeta value, $Res Function(CardMeta) _then) = _$CardMetaCopyWithImpl;
+@useResult
+$Res call({
+ String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl
+});
+
+
+
+
+}
+/// @nodoc
+class _$CardMetaCopyWithImpl<$Res>
+    implements $CardMetaCopyWith<$Res> {
+  _$CardMetaCopyWithImpl(this._self, this._then);
+
+  final CardMeta _self;
+  final $Res Function(CardMeta) _then;
+
+/// Create a copy of CardMeta
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,}) {
+  return _then(_self.copyWith(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,setId: null == setId ? _self.setId : setId // ignore: cast_nullable_to_non_nullable
+as String,setNumber: null == setNumber ? _self.setNumber : setNumber // ignore: cast_nullable_to_non_nullable
+as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as CardLanguage,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CardMeta].
+extension CardMetaPatterns on CardMeta {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CardMeta value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CardMeta() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CardMeta value)  $default,){
+final _that = this;
+switch (_that) {
+case _CardMeta():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CardMeta value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CardMeta() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CardMeta() when $default != null:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl)  $default,) {final _that = this;
+switch (_that) {
+case _CardMeta():
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl)?  $default,) {final _that = this;
+switch (_that) {
+case _CardMeta() when $default != null:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CardMeta implements CardMeta {
+  const _CardMeta({required this.name, @JsonKey(name: 'set_id') required this.setId, @JsonKey(name: 'set_number') required this.setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) required this.language, required this.variant, @JsonKey(name: 'image_url') required this.imageUrl});
+  factory _CardMeta.fromJson(Map<String, dynamic> json) => _$CardMetaFromJson(json);
+
+@override final  String name;
+@override@JsonKey(name: 'set_id') final  String setId;
+@override@JsonKey(name: 'set_number') final  String setNumber;
+@override@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) final  CardLanguage language;
+@override final  String variant;
+@override@JsonKey(name: 'image_url') final  String imageUrl;
+
+/// Create a copy of CardMeta
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CardMetaCopyWith<_CardMeta> get copyWith => __$CardMetaCopyWithImpl<_CardMeta>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CardMetaToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl);
+
+@override
+String toString() {
+  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CardMetaCopyWith<$Res> implements $CardMetaCopyWith<$Res> {
+  factory _$CardMetaCopyWith(_CardMeta value, $Res Function(_CardMeta) _then) = __$CardMetaCopyWithImpl;
+@override @useResult
+$Res call({
+ String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl
+});
+
+
+
+
+}
+/// @nodoc
+class __$CardMetaCopyWithImpl<$Res>
+    implements _$CardMetaCopyWith<$Res> {
+  __$CardMetaCopyWithImpl(this._self, this._then);
+
+  final _CardMeta _self;
+  final $Res Function(_CardMeta) _then;
+
+/// Create a copy of CardMeta
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,}) {
+  return _then(_CardMeta(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,setId: null == setId ? _self.setId : setId // ignore: cast_nullable_to_non_nullable
+as String,setNumber: null == setNumber ? _self.setNumber : setNumber // ignore: cast_nullable_to_non_nullable
+as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as CardLanguage,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$CardDocument {
+
+ String get id; CardMeta get meta; CardPricing get pricing;@JsonKey(name: 'psa_pop') PsaPop? get psaPop;
+/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CardDocumentCopyWith<CardDocument> get copyWith => _$CardDocumentCopyWithImpl<CardDocument>(this as CardDocument, _$identity);
+
+  /// Serializes this CardDocument to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.meta, meta) || other.meta == meta)&&(identical(other.pricing, pricing) || other.pricing == pricing)&&(identical(other.psaPop, psaPop) || other.psaPop == psaPop));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,meta,pricing,psaPop);
+
+@override
+String toString() {
+  return 'CardDocument(id: $id, meta: $meta, pricing: $pricing, psaPop: $psaPop)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CardDocumentCopyWith<$Res>  {
+  factory $CardDocumentCopyWith(CardDocument value, $Res Function(CardDocument) _then) = _$CardDocumentCopyWithImpl;
+@useResult
+$Res call({
+ String id, CardMeta meta, CardPricing pricing,@JsonKey(name: 'psa_pop') PsaPop? psaPop
+});
+
+
+$CardMetaCopyWith<$Res> get meta;$CardPricingCopyWith<$Res> get pricing;$PsaPopCopyWith<$Res>? get psaPop;
+
+}
+/// @nodoc
+class _$CardDocumentCopyWithImpl<$Res>
+    implements $CardDocumentCopyWith<$Res> {
+  _$CardDocumentCopyWithImpl(this._self, this._then);
+
+  final CardDocument _self;
+  final $Res Function(CardDocument) _then;
+
+/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? meta = null,Object? pricing = null,Object? psaPop = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as CardMeta,pricing: null == pricing ? _self.pricing : pricing // ignore: cast_nullable_to_non_nullable
+as CardPricing,psaPop: freezed == psaPop ? _self.psaPop : psaPop // ignore: cast_nullable_to_non_nullable
+as PsaPop?,
+  ));
+}
+/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CardMetaCopyWith<$Res> get meta {
+  
+  return $CardMetaCopyWith<$Res>(_self.meta, (value) {
+    return _then(_self.copyWith(meta: value));
+  });
+}/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CardPricingCopyWith<$Res> get pricing {
+  
+  return $CardPricingCopyWith<$Res>(_self.pricing, (value) {
+    return _then(_self.copyWith(pricing: value));
+  });
+}/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PsaPopCopyWith<$Res>? get psaPop {
+    if (_self.psaPop == null) {
+    return null;
+  }
+
+  return $PsaPopCopyWith<$Res>(_self.psaPop!, (value) {
+    return _then(_self.copyWith(psaPop: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [CardDocument].
+extension CardDocumentPatterns on CardDocument {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CardDocument value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CardDocument() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CardDocument value)  $default,){
+final _that = this;
+switch (_that) {
+case _CardDocument():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CardDocument value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CardDocument() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  CardMeta meta,  CardPricing pricing, @JsonKey(name: 'psa_pop')  PsaPop? psaPop)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CardDocument() when $default != null:
+return $default(_that.id,_that.meta,_that.pricing,_that.psaPop);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  CardMeta meta,  CardPricing pricing, @JsonKey(name: 'psa_pop')  PsaPop? psaPop)  $default,) {final _that = this;
+switch (_that) {
+case _CardDocument():
+return $default(_that.id,_that.meta,_that.pricing,_that.psaPop);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  CardMeta meta,  CardPricing pricing, @JsonKey(name: 'psa_pop')  PsaPop? psaPop)?  $default,) {final _that = this;
+switch (_that) {
+case _CardDocument() when $default != null:
+return $default(_that.id,_that.meta,_that.pricing,_that.psaPop);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CardDocument implements CardDocument {
+  const _CardDocument({required this.id, required this.meta, required this.pricing, @JsonKey(name: 'psa_pop') this.psaPop});
+  factory _CardDocument.fromJson(Map<String, dynamic> json) => _$CardDocumentFromJson(json);
+
+@override final  String id;
+@override final  CardMeta meta;
+@override final  CardPricing pricing;
+@override@JsonKey(name: 'psa_pop') final  PsaPop? psaPop;
+
+/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CardDocumentCopyWith<_CardDocument> get copyWith => __$CardDocumentCopyWithImpl<_CardDocument>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CardDocumentToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.meta, meta) || other.meta == meta)&&(identical(other.pricing, pricing) || other.pricing == pricing)&&(identical(other.psaPop, psaPop) || other.psaPop == psaPop));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,meta,pricing,psaPop);
+
+@override
+String toString() {
+  return 'CardDocument(id: $id, meta: $meta, pricing: $pricing, psaPop: $psaPop)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CardDocumentCopyWith<$Res> implements $CardDocumentCopyWith<$Res> {
+  factory _$CardDocumentCopyWith(_CardDocument value, $Res Function(_CardDocument) _then) = __$CardDocumentCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, CardMeta meta, CardPricing pricing,@JsonKey(name: 'psa_pop') PsaPop? psaPop
+});
+
+
+@override $CardMetaCopyWith<$Res> get meta;@override $CardPricingCopyWith<$Res> get pricing;@override $PsaPopCopyWith<$Res>? get psaPop;
+
+}
+/// @nodoc
+class __$CardDocumentCopyWithImpl<$Res>
+    implements _$CardDocumentCopyWith<$Res> {
+  __$CardDocumentCopyWithImpl(this._self, this._then);
+
+  final _CardDocument _self;
+  final $Res Function(_CardDocument) _then;
+
+/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? meta = null,Object? pricing = null,Object? psaPop = freezed,}) {
+  return _then(_CardDocument(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
+as CardMeta,pricing: null == pricing ? _self.pricing : pricing // ignore: cast_nullable_to_non_nullable
+as CardPricing,psaPop: freezed == psaPop ? _self.psaPop : psaPop // ignore: cast_nullable_to_non_nullable
+as PsaPop?,
+  ));
+}
+
+/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CardMetaCopyWith<$Res> get meta {
+  
+  return $CardMetaCopyWith<$Res>(_self.meta, (value) {
+    return _then(_self.copyWith(meta: value));
+  });
+}/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CardPricingCopyWith<$Res> get pricing {
+  
+  return $CardPricingCopyWith<$Res>(_self.pricing, (value) {
+    return _then(_self.copyWith(pricing: value));
+  });
+}/// Create a copy of CardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PsaPopCopyWith<$Res>? get psaPop {
+    if (_self.psaPop == null) {
+    return null;
+  }
+
+  return $PsaPopCopyWith<$Res>(_self.psaPop!, (value) {
+    return _then(_self.copyWith(psaPop: value));
+  });
+}
+}
+
+// dart format on

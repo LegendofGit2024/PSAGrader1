@@ -1,0 +1,242 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -----------------------------------------------------------------------
+    // Helper functions
+    // -----------------------------------------------------------------------
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isValidGrader() {
+      return request.resource.data.condition.slab.grader in
+        ['PSA', 'BGS', 'CGC', 'TAG', 'ACE', 'ARK', 'EGC'];
+    }
+
+    function isValidRawCondition() {
+      return request.resource.data.condition.raw_condition in
+        ['NM', 'LP', 'MP', 'HP', 'DMG'];
+    }
+
+    function isValidConditionType() {
+      return request.resource.data.condition.type in ['RAW', 'SLAB'];
+    }
+
+    function hasRequiredCollectionFields() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['card_ref', 'acquisition', 'condition', 'location', 'flags'])
+        && d.acquisition.keys().hasAll(['cost_basis', 'acquired_date'])
+        && isValidConditionType();
+    }
+
+    // -----------------------------------------------------------------------
+    // /cards/{cardId}  — global card catalog
+    // Read: any authenticated user
+    // Write: restricted to backend service account via Admin SDK only
+    //        (client writes blocked; Cloud Functions own this collection)
+    // -----------------------------------------------------------------------
+    match /cards/{cardId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Admin SDK only
+    }
+
+    // -----------------------------------------------------------------------
+    // /sets/{setId}  — card set metadata
+    // -----------------------------------------------------------------------
+    match /sets/{setId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // /user_collection/{userId}/items/{itemId}
+    // -----------------------------------------------------------------------
+    match /user_collection/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /items/{itemId} {
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId)
+          && hasRequiredCollectionFields()
+          && request.resource.data.acquisition.cost_basis is number
+          && request.resource.data.acquisition.cost_basis >= 0;
+
+        allow update: if isOwner(userId)
+          && hasRequiredCollectionFields();
+
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // /binders/{binderId}
+    // -----------------------------------------------------------------------
+    match /binders/{binderId} {
+      allow read: if isAuthenticated()
+        && resource.data.owner_uid == request.auth.uid;
+
+      allow create: if isAuthenticated()
+        && request.resource.data.owner_uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['owner_uid', 'name', 'type'])
+        && request.resource.data.type in ['BINDER', 'BOX', 'CASE', 'DISPLAY'];
+
+      allow update: if isAuthenticated()
+        && resource.data.owner_uid == request.auth.uid
+        // Prevent ownership transfer
+        && request.resource.data.owner_uid == resource.data.owner_uid;
+
+      allow delete: if isAuthenticated()
+        && resource.data.owner_uid == request.auth.uid;
+    }
+
+    // -----------------------------------------------------------------------
+    // /submission_estimates/{estimateId}  — ephemeral, per-user
+    // -----------------------------------------------------------------------
+    match /submission_estimates/{estimateId} {
+      allow read, delete: if isAuthenticated()
+        && resource.data.user_uid == request.auth.uid;
+
+      allow create: if isAuthenticated()
+        && request.resource.data.user_uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['user_uid', 'card_ref', 'inputs']);
+
+      allow update: if isAuthenticated()
+        && resource.data.user_uid == request.auth.uid;
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}  — public profile + friend graph
+    // -----------------------------------------------------------------------
+    match /users/{userId} {
+      // Anyone can read basic profile (needed for Connect/social module)
+      allow read: if isAuthenticated();
+
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['display_name', 'created_at']);
+
+      allow update: if isOwner(userId)
+        // Prevent uid spoofing
+        && (!request.resource.data.keys().hasAny(['uid'])
+            || request.resource.data.uid == request.auth.uid);
+
+      allow delete: if false; // handled server-side on account deletion
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}/wishlist/{cardId}
+    // -----------------------------------------------------------------------
+    match /users/{userId}/wishlist/{cardId} {
+      allow read: if isAuthenticated(); // friends can read for Wishlist Matching
+      allow write: if isOwner(userId);
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}/submissions/{submissionId}  — live stream feed
+    // -----------------------------------------------------------------------
+    match /users/{userId}/submissions/{submissionId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // -----------------------------------------------------------------------
+    // /activity_feed/{eventId}  — Connect module live stream
+    // Any authenticated user can post; all authenticated users can read.
+    // -----------------------------------------------------------------------
+    match /activity_feed/{eventId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['uid', 'cardName', 'graderLabel', 'estimatedValue', 'createdAt']);
+
+      // Reaction increments only (no full overwrites from clients)
+      allow update: if isAuthenticated()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['reactions']);
+
+      allow delete: if isAuthenticated()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    // -----------------------------------------------------------------------
+    // /whale_sales/{saleId}  — written by Cloud Functions / Admin SDK
+    // -----------------------------------------------------------------------
+    match /whale_sales/{saleId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // /market_signals/{cardId}  — Hot/Not signals, written by Cloud Functions
+    // -----------------------------------------------------------------------
+    match /market_signals/{cardId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // /market_stats/{cardId}  — Forecast engine inputs, written by Cloud Functions
+    // -----------------------------------------------------------------------
+    match /market_stats/{cardId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // /market_meta/{docId}  — Sentiment, written by Cloud Functions
+    // -----------------------------------------------------------------------
+    match /market_meta/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}/following/{friendUid}  — friend graph
+    // -----------------------------------------------------------------------
+    match /users/{userId}/following/{friendUid} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}/gem_stats/{docId}  — Gem accuracy counters
+    // Read: anyone authenticated (leaderboard)
+    // Write: owner only (via logGemResult batch)
+    // -----------------------------------------------------------------------
+    match /users/{userId}/gem_stats/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}/gem_results/{resultId}  — Individual prediction log
+    // -----------------------------------------------------------------------
+    match /users/{userId}/gem_results/{resultId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // -----------------------------------------------------------------------
+    // /users/{userId}/snapshots/{snapshotId}  — Daily portfolio value snapshots
+    // Written by Cloud Functions (snapshotPortfolioValues)
+    // -----------------------------------------------------------------------
+    match /users/{userId}/snapshots/{snapshotId} {
+      allow read: if isOwner(userId);
+      allow write: if false; // Cloud Functions / Admin SDK only
+    }
+
+    // -----------------------------------------------------------------------
+    // Catch-all: deny everything else
+    // -----------------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
