@@ -1,12 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/card.dart';
+import '../../models/tcg_card.dart';
 import '../../providers/submission_provider.dart';
 import '../../services/firestore_service.dart';
+import '../shared/tcg_search_field.dart';
 import '../theme/app_theme.dart';
 import 'widgets/fee_breakdown_sheet.dart';
 import 'widgets/gem_rate_widget.dart';
@@ -105,329 +106,57 @@ class _CardSelector extends ConsumerStatefulWidget {
   ConsumerState<_CardSelector> createState() => _CardSelectorState();
 }
 
-class _CardSelectorState extends ConsumerState<_CardSelector>
-    with SingleTickerProviderStateMixin {
-  late TabController _tab;
-  final _searchCtrl = TextEditingController();
+class _CardSelectorState extends ConsumerState<_CardSelector> {
+  TcgCard? _selectedTcgCard;
 
-  @override
-  void initState() {
-    super.initState();
-    _tab = TabController(length: 2, vsync: this);
+  Future<void> _onCardSelected(TcgCard card) async {
+    // Upsert into Firestore so estimatorCardProvider can resolve it.
+    final db = ref.read(firestoreServiceProvider);
+    final cardDoc = CardDocument(
+      id: card.id,
+      meta: CardMeta(
+        name: card.name,
+        setId: card.setId,
+        setNumber: card.number,
+        language: CardLanguage.en,
+        variant: '',
+        imageUrl: card.largeImageUrl,
+      ),
+      pricing: const CardPricing(),
+    );
+    await db.upsertCard(cardDoc);
+    if (!mounted) return;
+
+    setState(() => _selectedTcgCard = card);
+    ref.read(estimatorInputProvider.notifier).setCard(card.id);
   }
 
-  @override
-  void dispose() {
-    _tab.dispose();
-    _searchCtrl.dispose();
-    super.dispose();
+  void _onCardCleared() {
+    setState(() => _selectedTcgCard = null);
+    ref.read(estimatorInputProvider.notifier).setCard('');
   }
 
   @override
   Widget build(BuildContext context) {
-    final input = ref.watch(estimatorInputProvider);
-    final cardAsync = ref.watch(estimatorCardProvider);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section label
         _SectionLabel(icon: Icons.style_rounded, label: 'Card'),
         const SizedBox(height: 10),
 
-        // Mode tabs
-        Container(
-          height: 38,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: TabBar(
-            controller: _tab,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.border),
-            ),
-            labelStyle: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w700),
-            unselectedLabelStyle: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w500),
-            labelColor: AppColors.textPrimary,
-            unselectedLabelColor: AppColors.textSecondary,
-            dividerColor: Colors.transparent,
-            tabs: const [
-              Tab(text: 'Search'),
-              Tab(text: 'Scan QR'),
-            ],
-          ),
+        // TCG live-search with thumbnails
+        TcgSearchField(
+          selectedCard: _selectedTcgCard,
+          onSelected: _onCardSelected,
+          onCleared: _onCardCleared,
+          hintText: 'Name, set or card number…',
+          label: 'Search card',
         ),
-        const SizedBox(height: 10),
-
-        // Tab views
-        SizedBox(
-          height: 52,
-          child: TabBarView(
-            controller: _tab,
-            children: [
-              // Search
-              _SearchField(
-                ctrl: _searchCtrl,
-                onCardSelected: (cardId) {
-                  ref
-                      .read(estimatorInputProvider.notifier)
-                      .setCard(cardId);
-                  _searchCtrl.clear();
-                },
-              ),
-              // Scan placeholder
-              _ScanPlaceholder(
-                onScanned: (cardId) => ref
-                    .read(estimatorInputProvider.notifier)
-                    .setCard(cardId),
-              ),
-            ],
-          ),
-        ),
-
-        // Selected card preview
-        if (input.cardId != null) ...[
-          const SizedBox(height: 12),
-          cardAsync.when(
-            loading: () => const _CardPreviewShimmer(),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (card) => card == null
-                ? const SizedBox.shrink()
-                : _SelectedCardPreview(
-                    card: card,
-                    onClear: () => ref
-                        .read(estimatorInputProvider.notifier)
-                        .setCard(''),
-                  ),
-          ),
-        ],
       ],
     );
   }
 }
 
-class _SearchField extends ConsumerStatefulWidget {
-  const _SearchField({required this.ctrl, required this.onCardSelected});
-  final TextEditingController ctrl;
-  final ValueChanged<String> onCardSelected;
-
-  @override
-  ConsumerState<_SearchField> createState() => _SearchFieldState();
-}
-
-class _SearchFieldState extends ConsumerState<_SearchField> {
-  List<dynamic> _results = [];
-
-  Future<void> _search(String query) async {
-    if (query.length < 2) {
-      setState(() => _results = []);
-      return;
-    }
-    final fs = ref.read(firestoreServiceProvider);
-    final cards = await fs.searchCards(nameQuery: query);
-    if (mounted) setState(() => _results = cards);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        TextField(
-          controller: widget.ctrl,
-          onChanged: _search,
-          style: const TextStyle(
-              fontSize: 14, color: AppColors.textPrimary),
-          decoration: InputDecoration(
-            hintText: 'Search card name or set…',
-            hintStyle: const TextStyle(
-                fontSize: 13, color: AppColors.textDisabled),
-            prefixIcon: const Icon(Icons.search_rounded,
-                size: 18, color: AppColors.textDisabled),
-            filled: true,
-            fillColor: AppColors.surfaceVariant,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.accent),
-            ),
-          ),
-        ),
-        if (_results.isNotEmpty)
-          Positioned(
-            top: 52,
-            left: 0,
-            right: 0,
-            child: Material(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              elevation: 8,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 220),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  itemCount: _results.length,
-                  itemBuilder: (_, i) {
-                    final c = _results[i];
-                    return ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 0),
-                      title: Text(
-                        c.meta.name,
-                        style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary),
-                      ),
-                      subtitle: Text(
-                        '${c.meta.setId}  ·  ${c.meta.setNumber}',
-                        style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary),
-                      ),
-                      onTap: () {
-                        widget.onCardSelected(c.id);
-                        setState(() => _results = []);
-                        widget.ctrl.clear();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _ScanPlaceholder extends StatelessWidget {
-  const _ScanPlaceholder({required this.onScanned});
-  final ValueChanged<String> onScanned;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: AppColors.accent.withOpacity(0.3),
-            style: BorderStyle.solid),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.qr_code_scanner_rounded,
-              size: 18, color: AppColors.accent),
-          SizedBox(width: 8),
-          Text(
-            'Tap to scan PSA cert / card barcode',
-            style: TextStyle(fontSize: 13, color: AppColors.accent),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SelectedCardPreview extends StatelessWidget {
-  const _SelectedCardPreview({required this.card, required this.onClear});
-  final dynamic card;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: AppColors.accent.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: CachedNetworkImage(
-              imageUrl: card.meta.imageUrl,
-              width: 44,
-              height: 62,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  card.meta.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '${card.meta.setId}  ·  ${card.meta.setNumber}',
-                  style: const TextStyle(
-                      fontSize: 11, color: AppColors.textSecondary),
-                ),
-                if (card.pricing.ebayUs?.lastSoldNm != null)
-                  Text(
-                    'eBay NM: \$${card.pricing.ebayUs!.lastSoldNm!.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.accent),
-                  ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close_rounded,
-                size: 16, color: AppColors.textDisabled),
-            onPressed: onClear,
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 250.ms);
-  }
-}
-
-class _CardPreviewShimmer extends StatelessWidget {
-  const _CardPreviewShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 74,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Input section — grade selector + cost basis

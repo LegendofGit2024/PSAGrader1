@@ -7,7 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/card.dart';
+import '../../models/tcg_card.dart';
 import '../../providers/forecast_provider.dart';
+import '../../services/firestore_service.dart';
+import '../shared/tcg_search_field.dart';
 import '../theme/app_theme.dart';
 import 'widgets/heat_index_tile.dart';
 import 'widgets/projection_tile.dart';
@@ -29,26 +32,42 @@ class ForecastScreen extends ConsumerStatefulWidget {
 }
 
 class _ForecastScreenState extends ConsumerState<ForecastScreen> {
-  final _searchCtrl = TextEditingController();
+  TcgCard? _selectedTcgCard;
   String? _selectedCardId;
-  bool _searchFocused = false;
+  bool _searching = false; // true while the search field is active / populated
 
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
+  void _onCardSelected(TcgCard card) async {
+    // Upsert into Firestore so cardForecastProvider can resolve it.
+    final db = ref.read(firestoreServiceProvider);
+    final cardDoc = CardDocument(
+      id: card.id,
+      meta: CardMeta(
+        name: card.name,
+        setId: card.setId,
+        setNumber: card.number,
+        language: CardLanguage.en,
+        variant: '',
+        imageUrl: card.largeImageUrl,
+      ),
+      pricing: const CardPricing(),
+    );
+    await db.upsertCard(cardDoc);
 
-  void _selectCard(String cardId) {
-    _searchCtrl.clear();
-    ref.read(forecastSearchQueryProvider.notifier).set('');
+    if (!mounted) return;
     setState(() {
-      _selectedCardId = cardId;
-      _searchFocused = false;
+      _selectedTcgCard = card;
+      _selectedCardId = card.id;
+      _searching = false;
     });
   }
 
-  void _clearSelection() => setState(() => _selectedCardId = null);
+  void _onCardCleared() {
+    setState(() {
+      _selectedTcgCard = null;
+      _selectedCardId = null;
+      _searching = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,26 +77,28 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> {
         child: Column(
           children: [
             _Header(
-              onBack: _selectedCardId != null ? _clearSelection : null,
+              onBack: _selectedCardId != null ? _onCardCleared : null,
             ),
-            _SearchBar(
-              controller: _searchCtrl,
-              onChanged: (q) {
-                ref.read(forecastSearchQueryProvider.notifier).set(q);
-                setState(() => _searchFocused = q.isNotEmpty);
-              },
-              onClear: () {
-                _searchCtrl.clear();
-                ref.read(forecastSearchQueryProvider.notifier).set('');
-                setState(() => _searchFocused = false);
-              },
+
+            // ── TCG live-search field ──────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: TcgSearchField(
+                selectedCard: _selectedTcgCard,
+                onSelected: _onCardSelected,
+                onCleared: _onCardCleared,
+                hintText: 'Search any card to forecast…',
+                label: 'Search card',
+              ),
             ),
+
             Expanded(
-              child: _searchFocused
-                  ? _SearchResultsPanel(onSelect: _selectCard)
-                  : _selectedCardId != null
-                      ? _CardDetailPanel(cardId: _selectedCardId!)
-                      : _PortfolioForecastPanel(onSelect: _selectCard),
+              child: _selectedCardId != null
+                  ? _CardDetailPanel(cardId: _selectedCardId!)
+                  : _PortfolioForecastPanel(
+                      onSelect: (cardId) =>
+                          setState(() => _selectedCardId = cardId),
+                    ),
             ),
           ],
         ),
@@ -145,176 +166,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Search bar
-// ---------------------------------------------------------------------------
-
-class _SearchBar extends StatelessWidget {
-  const _SearchBar({
-    required this.controller,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: TextField(
-          controller: controller,
-          onChanged: onChanged,
-          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
-          decoration: InputDecoration(
-            hintText: 'Search any card to forecast…',
-            hintStyle: const TextStyle(
-                fontSize: 13, color: AppColors.textDisabled),
-            prefixIcon: const Icon(Icons.search_rounded,
-                size: 18, color: AppColors.textDisabled),
-            suffixIcon: controller.text.isNotEmpty
-                ? GestureDetector(
-                    onTap: onClear,
-                    child: const Icon(Icons.close_rounded,
-                        size: 16, color: AppColors.textDisabled),
-                  )
-                : null,
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Search results panel
-// ---------------------------------------------------------------------------
-
-class _SearchResultsPanel extends ConsumerWidget {
-  const _SearchResultsPanel({required this.onSelect});
-  final ValueChanged<String> onSelect;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final results = ref.watch(forecastSearchResultsProvider);
-
-    return results.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: AppColors.accent),
-      ),
-      error: (_, __) => const Center(
-        child: Text('Search failed',
-            style: TextStyle(color: AppColors.textDisabled)),
-      ),
-      data: (cards) {
-        if (cards.isEmpty) {
-          return const Center(
-            child: Text(
-              'No cards found',
-              style: TextStyle(fontSize: 13, color: AppColors.textDisabled),
-            ),
-          );
-        }
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-          itemCount: cards.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 6),
-          itemBuilder: (_, i) => _SearchResultRow(
-            card: cards[i],
-            onTap: () => onSelect(cards[i].id),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SearchResultRow extends StatelessWidget {
-  const _SearchResultRow({required this.card, required this.onTap});
-  final CardDocument card;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final price = card.pricing.ebayUs?.lastSoldNm;
-    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            // Card image thumbnail
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: card.meta.imageUrl.isNotEmpty
-                  ? Image.network(
-                      card.meta.imageUrl,
-                      width: 36,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _ImagePlaceholder(),
-                    )
-                  : _ImagePlaceholder(),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    card.meta.name,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    card.meta.setId,
-                    style: const TextStyle(
-                        fontSize: 10, color: AppColors.textDisabled),
-                  ),
-                ],
-              ),
-            ),
-            if (price != null)
-              Text(
-                fmt.format(price),
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.accent,
-                ),
-              ),
-            const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded,
-                size: 16, color: AppColors.textDisabled),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// (Search bar and results panel replaced by TcgSearchField in the state class)
 
 class _ImagePlaceholder extends StatelessWidget {
   @override
