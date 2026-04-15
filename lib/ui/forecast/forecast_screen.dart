@@ -115,6 +115,15 @@ class _Header extends StatelessWidget {
   const _Header({this.onBack});
   final VoidCallback? onBack;
 
+  void _showExplainer(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _ForecastExplainerSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -132,10 +141,7 @@ class _Header extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
-          const Text(
-            '🔮',
-            style: TextStyle(fontSize: 22),
-          ),
+          const Text('🔮', style: TextStyle(fontSize: 22)),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,6 +165,500 @@ class _Header extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const Spacer(),
+          Semantics(
+            label: 'How the forecast works',
+            button: true,
+            child: GestureDetector(
+              onTap: () => _showExplainer(context),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Icon(
+                  Icons.help_outline_rounded,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Forecast explainer bottom sheet
+// ---------------------------------------------------------------------------
+
+class _ForecastExplainerSheet extends StatelessWidget {
+  const _ForecastExplainerSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.92,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (_, controller) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: Row(
+                  children: [
+                    const Text('🔮', style: TextStyle(fontSize: 24)),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'How the Forecast Works',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            'A plain-English guide to every metric',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textDisabled,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Close',
+                      button: true,
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: const Icon(Icons.close_rounded,
+                            color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Divider(color: AppColors.border, height: 1),
+
+              // Scrollable content
+              Expanded(
+                child: ListView(
+                  controller: controller,
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+                  children: const [
+
+                    _SectionHeader(emoji: '📈', title: '30-Day Price Trend'),
+                    _ExplainerCard(
+                      body:
+                          'This chart shows the card\'s real sale prices over the last 30 days. '
+                          'Each point is an actual eBay transaction. '
+                          'The colour of the line matches the overall signal — '
+                          'green means the model thinks it\'s a good time to buy, '
+                          'amber means hold, red means consider selling. '
+                          'The badge in the top-right shows the total % change over that period.',
+                    ),
+
+                    SizedBox(height: 20),
+                    _SectionHeader(emoji: '🎯', title: '12-Month Price Projection'),
+                    _ExplainerCard(
+                      body:
+                          'This is the app\'s best estimate of where the price will be in '
+                          '12 months. It is not a guarantee — it is a model based on four '
+                          'factors shown as chips below the chart. '
+                          'Green chips are pushing the forecast higher. '
+                          'Amber chips are a slight drag. '
+                          'Grey chips are neutral.',
+                    ),
+                    SizedBox(height: 10),
+
+                    _FactorRow(
+                      emoji: '💎',
+                      label: 'Scarcity',
+                      color: AppColors.success,
+                      body:
+                          'Measures how hard it is to find a PSA 10 copy. '
+                          'If only a tiny fraction of all graded copies ever received a perfect 10, '
+                          'the card is rare and the forecast is boosted. '
+                          'A card where half of all copies are PSA 10 gets no boost.',
+                      range: '1.0× (common) → 1.5× (very rare)',
+                    ),
+                    _FactorRow(
+                      emoji: '⚡',
+                      label: 'Velocity',
+                      color: AppColors.accent,
+                      body:
+                          'Measures how actively the card is being bought and sold on eBay '
+                          'right now, based on the last 7 days of sales. '
+                          'High activity means the price is real and liquid — people actually '
+                          'want this card. Low or no recent sales gets a slight penalty '
+                          'because the price may be stale.',
+                      range: '0.9× (illiquid) → 1.2× (50+ sales/week)',
+                    ),
+                    _FactorRow(
+                      emoji: '📅',
+                      label: 'Age Lift',
+                      color: AppColors.warning,
+                      body:
+                          'Vintage sets that are out of print — like Base Set, Jungle, Fossil, '
+                          'Neo, EX era, and early Diamond & Pearl — get a long-term growth bonus. '
+                          'No new copies can ever enter the market, so supply can only shrink over time. '
+                          'Modern sets (Scarlet & Violet, Sword & Shield) get no boost.',
+                      range: '1.0× (modern) or 1.15× (vintage / out of print)',
+                    ),
+                    _FactorRow(
+                      emoji: '📊',
+                      label: 'Sentiment',
+                      color: AppColors.accentSoft,
+                      body:
+                          'Reflects the current mood of the collector community, '
+                          'sourced from social data in the app\'s database. '
+                          'When the community is excited and bullish, this pushes the '
+                          'forecast higher. When sentiment is cautious or bearish, it pulls it down.',
+                      range: '0.5× (very bearish) → 1.5× (very bullish)',
+                    ),
+
+                    SizedBox(height: 20),
+                    _SectionHeader(emoji: '🟢', title: 'BUY / HOLD / SELL Signal'),
+                    _ExplainerCard(
+                      body:
+                          'A single verdict — Buy, Hold, or Sell — with a confidence score '
+                          'and a one-sentence reason. It is calculated by weighing five market signals:',
+                    ),
+                    SizedBox(height: 8),
+                    _BulletRow(
+                      emoji: '📉',
+                      label: 'Low Supply',
+                      body: 'Active listings dropped 20%+ week-over-week. '
+                            'Fewer cards for sale usually means prices rise soon.',
+                    ),
+                    _BulletRow(
+                      emoji: '🧱',
+                      label: 'Pop Plateau',
+                      body: 'The number of PSA 10s being created is growing very slowly (under 1%). '
+                            'The ceiling on supply is effectively set.',
+                    ),
+                    _BulletRow(
+                      emoji: '🔥',
+                      label: 'High Velocity',
+                      body: 'The card is selling faster than its 30-day average — '
+                            'strong demand signal.',
+                    ),
+                    _BulletRow(
+                      emoji: '⚠️',
+                      label: 'Overheating',
+                      body: 'Price jumped 30%+ in the last 14 days. '
+                            'Rapid pumps often correct — the model leans toward Sell.',
+                    ),
+                    _BulletRow(
+                      emoji: '🔄',
+                      label: 'Flipper Influx',
+                      body: 'More than 35% of listings come from accounts under 90 days old. '
+                            'This suggests short-term speculators, which often precedes a sell-off.',
+                    ),
+
+                    SizedBox(height: 20),
+                    _SectionHeader(emoji: '🌡️', title: 'Heat Index'),
+                    _ExplainerCard(
+                      body:
+                          'A score that tells you how "hot" the card is right now — '
+                          'not where it\'s going, just how much activity is happening today.\n\n'
+                          '🔥 Above 1.5 = Heating Up — strong sales momentum\n'
+                          '〰 0.5 to 1.5 = Stable — normal trading activity\n'
+                          '❄️ Below 0.5 = Cooling Down — low interest\n\n'
+                          'It combines two things: how much faster the card is selling '
+                          'compared to its 30-day average (60% weight), '
+                          'and how much the price moved in the last 7 days (40% weight).',
+                    ),
+
+                    SizedBox(height: 20),
+                    _SectionHeader(emoji: '📊', title: 'S&P 500 Comparison'),
+                    _ExplainerCard(
+                      body:
+                          'Compares the card\'s projected 1-year return against the stock market\'s '
+                          'historical average of about 10.5% per year.\n\n'
+                          'If the card is projected to return more than that, it shows '
+                          '"Beats the Market" in green — meaning holding this card could '
+                          'outperform a standard index fund investment.\n\n'
+                          'If it\'s below that, it shows the gap in red. '
+                          'This helps you decide if the card is actually a smart investment '
+                          'compared to alternatives.',
+                    ),
+
+                    SizedBox(height: 20),
+                    _DisclaimerBox(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Explainer sheet sub-widgets
+// ---------------------------------------------------------------------------
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.emoji, required this.title});
+  final String emoji;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExplainerCard extends StatelessWidget {
+  const _ExplainerCard({required this.body});
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Text(
+        body,
+        style: const TextStyle(
+          fontSize: 13,
+          color: AppColors.textSecondary,
+          height: 1.55,
+        ),
+      ),
+    );
+  }
+}
+
+class _FactorRow extends StatelessWidget {
+  const _FactorRow({
+    required this.emoji,
+    required this.label,
+    required this.color,
+    required this.body,
+    required this.range,
+  });
+  final String emoji;
+  final String label;
+  final Color color;
+  final String body;
+  final String range;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$label factor: $body Range: $range',
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: color.withOpacity(0.35)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(emoji,
+                          style: const TextStyle(fontSize: 13)),
+                      const SizedBox(width: 5),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'Range: $range',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textDisabled,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BulletRow extends StatelessWidget {
+  const _BulletRow({
+    required this.emoji,
+    required this.label,
+    required this.body,
+  });
+  final String emoji;
+  final String label;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$label: $body',
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(emoji,
+                style: const TextStyle(fontSize: 16)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$label  ',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    TextSpan(
+                      text: body,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DisclaimerBox extends StatelessWidget {
+  const _DisclaimerBox();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('⚠️', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Forecasts are estimates, not financial advice. '
+              'Card markets are volatile and past trends do not guarantee future prices. '
+              'Always do your own research before buying or selling.',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                height: 1.55,
+              ),
+            ),
           ),
         ],
       ),
