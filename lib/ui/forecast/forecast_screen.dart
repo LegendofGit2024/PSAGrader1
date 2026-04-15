@@ -47,7 +47,7 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> {
         setNumber: card.number,
         language: CardLanguage.en,
         variant: '',
-        imageUrl: card.largeImageUrl,
+        imageUrl: card.largeImageUrl ?? '',
       ),
       pricing: const CardPricing(),
     );
