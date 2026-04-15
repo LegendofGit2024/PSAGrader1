@@ -106,6 +106,8 @@ class ProjectionResult {
     this.velocityMultiplier = 1.0,
     this.ageFactor = 1.0,
     this.projectionPoints = const [],
+    this.projectionPoints5y = const [],
+    this.projectionPoints10y = const [],
   });
 
   final double currentPrice;
@@ -125,6 +127,12 @@ class ProjectionResult {
 
   /// 13 monthly price points (month 0 = now, month 12 = projected)
   final List<ProjectionPoint> projectionPoints;
+
+  /// 61-point monthly projection curve for 5 years
+  final List<ProjectionPoint> projectionPoints5y;
+
+  /// 121-point monthly projection curve for 10 years
+  final List<ProjectionPoint> projectionPoints10y;
 
   double get returnPct =>
       currentPrice > 0
@@ -328,6 +336,16 @@ class ForecastEngine {
       currentPrice: currentPrice,
       annualReturn: adjustedReturn,
     );
+    final points5y = generateProjectionPoints(
+      currentPrice: currentPrice,
+      annualReturn: adjustedReturn,
+      years: 5,
+    );
+    final points10y = generateProjectionPoints(
+      currentPrice: currentPrice,
+      annualReturn: adjustedReturn,
+      years: 10,
+    );
 
     return ProjectionResult(
       currentPrice:        currentPrice,
@@ -339,6 +357,8 @@ class ForecastEngine {
       velocityMultiplier:  velocity,
       ageFactor:           age,
       projectionPoints:    points,
+      projectionPoints5y:  points5y,
+      projectionPoints10y: points10y,
     );
   }
 
@@ -394,15 +414,17 @@ class ForecastEngine {
     return 1.0;
   }
 
-  // ── 12-Month Projection Curve ─────────────────────────────────────────────
-  // Returns 13 monthly price points (month 0 = current, month 12 = projected).
+  // ── Projection Curve ──────────────────────────────────────────────────────
+  /// Generates monthly projection points for [years] years.
+  /// Returns (years × 12 + 1) points: month 0 = now, last = end of projection.
   static List<ProjectionPoint> generateProjectionPoints({
     required double currentPrice,
     required double annualReturn,
+    int years = 1,
   }) {
+    final totalMonths = years * 12;
     final points = <ProjectionPoint>[];
-    for (int m = 0; m <= 12; m++) {
-      // Compound monthly: price * (1+r)^(m/12)
+    for (int m = 0; m <= totalMonths; m++) {
       final factor = _pow(1.0 + annualReturn, m / 12.0);
       points.add(ProjectionPoint(month: m, price: currentPrice * factor));
     }
@@ -468,21 +490,40 @@ Future<List<PricePoint>> _fetchPriceHistory(String cardId) async {
   return [];
 }
 
-List<PricePoint> _generateStubHistory(double currentPrice) {
+/// Generates a realistic stub price history for [days] days back from now.
+/// Uses a seeded Brownian-motion style random walk so prices actually vary.
+List<PricePoint> generateStubHistory(double currentPrice, {int days = 30}) {
+  if (currentPrice <= 0) currentPrice = 10.0;
   final now = DateTime.now();
   final points = <PricePoint>[];
-  double p = currentPrice * 0.88;
-  for (int i = 29; i >= 0; i--) {
-    final noise = (i % 7 == 0 ? 0.03 : 0.01) *
-        (i.isEven ? 1 : -1) * currentPrice;
-    final trend = (currentPrice - p) / 30;
-    p = (p + trend + noise).clamp(currentPrice * 0.5, currentPrice * 1.5);
+
+  // Daily volatility: ~1.5% for stable cards, more for cheaper ones
+  final dailyVol = math.max(currentPrice * 0.015, 0.5);
+
+  // Start price: drift back from current based on set CAGR (~0.12/year default)
+  final dailyDrift = 0.12 / 365;
+  double p = currentPrice / math.pow(1 + dailyDrift, days.toDouble());
+
+  // Simple LCG seeded on card price for determinism per card
+  int seed = (currentPrice * 1000).toInt() & 0xFFFFFFFF;
+  double nextRand() {
+    seed = (seed * 1664525 + 1013904223) & 0xFFFFFFFF;
+    return (seed / 0xFFFFFFFF) - 0.5; // -0.5 to 0.5
+  }
+
+  for (int i = days; i >= 0; i--) {
+    final noise = nextRand() * dailyVol * 2;
+    final drift = p * dailyDrift;
+    p = math.max(p + drift + noise, currentPrice * 0.1);
     points.add(PricePoint(
       date: now.subtract(Duration(days: i)),
-      price: p,
+      price: double.parse(p.toStringAsFixed(2)),
     ));
   }
-  points.add(PricePoint(date: now, price: currentPrice));
+  // Force last point to be exactly currentPrice
+  if (points.isNotEmpty) {
+    points[points.length - 1] = PricePoint(date: now, price: currentPrice);
+  }
   return points;
 }
 
@@ -558,7 +599,7 @@ Future<CardForecast> cardForecast(Ref ref, String cardId) async {
   final sentiment    = await _fetchSentimentMultiplier();
 
   var history = await _fetchPriceHistory(cardId);
-  if (history.isEmpty) history = _generateStubHistory(currentPrice);
+  if (history.isEmpty) history = generateStubHistory(currentPrice, days: 30);
 
   final heat = ForecastEngine.computeHeat(
     volume24h:    stats.volume24h,

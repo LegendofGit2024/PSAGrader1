@@ -1,6 +1,3 @@
-import 'dart:math' as math;
-
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -974,7 +971,7 @@ class _CardDetailContent extends StatelessWidget {
         _CardIdentityHeader(forecast: forecast),
         const SizedBox(height: 16),
 
-        // 30-day trend chart
+        // Unified historical + projection chart
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -982,14 +979,11 @@ class _CardDetailContent extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: AppColors.border),
           ),
-          child: TrendChart(
-            history: forecast.priceHistory,
-            signal: forecast.signal.signal,
-          ),
+          child: UnifiedPriceChart(forecast: forecast),
         ),
         const SizedBox(height: 12),
 
-        // 12-month price projection with weighted formula breakdown
+        // Factor breakdown (scarcity/velocity/age/sentiment chips + price boxes)
         _ProjectionChartCard(projection: forecast.projection),
         const SizedBox(height: 12),
 
@@ -1027,20 +1021,6 @@ class _ProjectionChartCard extends StatelessWidget {
     final returnColor =
         returnPct >= 0 ? AppColors.success : AppColors.danger;
     final sign = returnPct >= 0 ? '+' : '';
-
-    // Build fl_chart spots from the 13 monthly projection points
-    final spots = projection.projectionPoints
-        .map((p) => FlSpot(p.month.toDouble(), p.price))
-        .toList();
-
-    // Guard against empty list (shouldn't happen, but safety first)
-    if (spots.isEmpty) return const SizedBox.shrink();
-
-    final minY = spots.map((s) => s.y).reduce(math.min) * 0.97;
-    final maxY = spots.map((s) => s.y).reduce(math.max) * 1.03;
-    final spread = math.max(maxY - minY, maxY * 0.02 + 1.0);
-    final chartMinY = minY - spread * 0.05;
-    final chartMaxY = maxY + spread * 0.05;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1099,125 +1079,6 @@ class _ProjectionChartCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // ── Projection chart ─────────────────────────────────────────────
-          SizedBox(
-            height: 140,
-            child: LineChart(
-              LineChartData(
-                minY: chartMinY,
-                maxY: chartMaxY,
-                clipData: const FlClipData.all(),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: (chartMaxY - chartMinY) / 4,
-                  getDrawingHorizontalLine: (_) => FlLine(
-                    color: AppColors.border.withOpacity(0.4),
-                    strokeWidth: 0.7,
-                    dashArray: [4, 6],
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 52,
-                      interval: (chartMaxY - chartMinY) / 4,
-                      getTitlesWidget: (v, _) => Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: Text(
-                          _fmtPrice(v),
-                          style: const TextStyle(
-                              fontSize: 9, color: AppColors.textDisabled),
-                        ),
-                      ),
-                    ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 20,
-                      interval: 3,
-                      getTitlesWidget: (v, _) {
-                        final m = v.toInt();
-                        if (m == 0) return const Padding(
-                          padding: EdgeInsets.only(top: 4),
-                          child: Text('Now',
-                            style: TextStyle(fontSize: 8, color: AppColors.textDisabled)),
-                        );
-                        if (m % 3 == 0) return Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text('${m}M',
-                            style: const TextStyle(fontSize: 8, color: AppColors.textDisabled)),
-                        );
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                ),
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.surfaceVariant,
-                    getTooltipItems: (touchedSpots) =>
-                        touchedSpots.map((s) => LineTooltipItem(
-                          'Month ${s.x.toInt()}\n',
-                          const TextStyle(fontSize: 10, color: AppColors.textSecondary),
-                          children: [
-                            TextSpan(
-                              text: '\$${s.y.toStringAsFixed(0)}',
-                              style: TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w800,
-                                color: returnColor,
-                              ),
-                            ),
-                          ],
-                        )).toList(),
-                  ),
-                ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    curveSmoothness: 0.3,
-                    color: returnColor,
-                    barWidth: 2,
-                    dotData: FlDotData(
-                      show: true,
-                      checkToShowDot: (spot, _) => spot.x == 0 || spot.x == 12,
-                      getDotPainter: (_, __, ___, ____) => FlDotCirclePainter(
-                        radius: 4,
-                        color: returnColor,
-                        strokeColor: AppColors.background,
-                        strokeWidth: 2,
-                      ),
-                    ),
-                    shadow: Shadow(
-                        color: returnColor.withOpacity(0.3), blurRadius: 10),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          returnColor.withOpacity(0.14),
-                          returnColor.withOpacity(0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutCubic,
-            ),
-          ),
-          const SizedBox(height: 14),
-
           // ── Factor chips ─────────────────────────────────────────────────
           Wrap(
             spacing: 8,
@@ -1250,10 +1111,6 @@ class _ProjectionChartCard extends StatelessWidget {
     );
   }
 
-  String _fmtPrice(double v) {
-    if (v >= 1000) return '\$${(v / 1000).toStringAsFixed(1)}k';
-    return '\$${v.toStringAsFixed(0)}';
-  }
 }
 
 class _PriceBox extends StatelessWidget {
