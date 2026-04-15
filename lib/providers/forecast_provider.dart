@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -100,20 +102,41 @@ class ProjectionResult {
     required this.cagr,
     required this.sentimentMultiplier,
     required this.setId,
+    this.scarcityMultiplier = 1.0,
+    this.velocityMultiplier = 1.0,
+    this.ageFactor = 1.0,
+    this.projectionPoints = const [],
   });
 
   final double currentPrice;
   final double projectedPrice1Y;
   final double cagr;
-
-  /// 0.5–1.5
   final double sentimentMultiplier;
   final String setId;
+
+  /// PSA 10 scarcity bonus: 1.0 (not scarce) → 1.5 (very scarce)
+  final double scarcityMultiplier;
+
+  /// Volume confidence: 0.9 (illiquid) → 1.2 (high volume)
+  final double velocityMultiplier;
+
+  /// Set age / out-of-print long-term lift: 1.0 or 1.15 (vintage)
+  final double ageFactor;
+
+  /// 13 monthly price points (month 0 = now, month 12 = projected)
+  final List<ProjectionPoint> projectionPoints;
 
   double get returnPct =>
       currentPrice > 0
           ? ((projectedPrice1Y - currentPrice) / currentPrice) * 100
           : 0;
+}
+
+/// A single point on the 12-month projected price curve
+class ProjectionPoint {
+  const ProjectionPoint({required this.month, required this.price});
+  final int month;      // 0 = now, 12 = 1 year out
+  final double price;
 }
 
 /// 30-day price history point (loaded from Firestore price_history collection)
@@ -280,23 +303,42 @@ class ForecastEngine {
   }
 
   // ── 1-Year Projection ────────────────────────────────────────────────────
-  // Projected Value = Current Price × (1 + (CAGR_Set × Market_Sentiment))
+  // Adjusted annual return = base CAGR × scarcity × velocity × age × sentiment
   // sentimentMultiplier: 0.5 (bearish) → 1.5 (very bullish)
 
   static ProjectionResult computeProjection({
     required double currentPrice,
     required String setId,
     required double sentimentMultiplier,
+    PsaPop? psaPop,
+    double? volume7d,
   }) {
-    final cagr = cagrForSet(setId);
-    final projected = currentPrice * (1 + (cagr * sentimentMultiplier));
+    final baseCagr = cagrForSet(setId);
+    final scarcity = computeScarcityMultiplier(psaPop);
+    final velocity = computeVelocityMultiplier(volume7d);
+    final age      = computeAgeFactor(setId);
+
+    // Adjusted annual return = base CAGR × all multipliers × sentiment
+    final adjustedReturn =
+        baseCagr * scarcity * velocity * age * sentimentMultiplier;
+
+    final projected = currentPrice * (1.0 + adjustedReturn);
+
+    final points = generateProjectionPoints(
+      currentPrice: currentPrice,
+      annualReturn: adjustedReturn,
+    );
 
     return ProjectionResult(
-      currentPrice: currentPrice,
-      projectedPrice1Y: projected,
-      cagr: cagr,
+      currentPrice:        currentPrice,
+      projectedPrice1Y:    projected,
+      cagr:                baseCagr,
       sentimentMultiplier: sentimentMultiplier,
-      setId: setId,
+      setId:               setId,
+      scarcityMultiplier:  scarcity,
+      velocityMultiplier:  velocity,
+      ageFactor:           age,
+      projectionPoints:    points,
     );
   }
 
@@ -313,6 +355,64 @@ class ForecastEngine {
       cardReturn1Y: projectedReturnPct,
       sp500Return1Y: _sp500Cagr * 100,
     );
+  }
+
+  // ── Scarcity Multiplier ───────────────────────────────────────────────────
+  // Low PSA 10 % of total pop → higher scarcity → bigger upside multiplier
+  // Range: 1.0 (not scarce / no data) → 1.5 (very scarce)
+  static double computeScarcityMultiplier(PsaPop? psaPop) {
+    if (psaPop == null) return 1.0;
+    final total = psaPop.totalPop ?? 0;
+    final pop10 = psaPop.pop10 ?? 0;
+    if (total == 0) return 1.0;
+    final psa10Ratio = (pop10 / total).clamp(0.0, 1.0);
+    // Invert: low ratio = high scarcity
+    return 1.0 + (1.0 - psa10Ratio) * 0.5;
+  }
+
+  // ── Velocity Multiplier ───────────────────────────────────────────────────
+  // Higher weekly eBay volume → more confidence in price → small upside boost
+  // Range: 0.90 (no data / illiquid) → 1.20 (50+ sales/week)
+  static double computeVelocityMultiplier(double? volume7d) {
+    if (volume7d == null || volume7d <= 0) return 0.90;
+    final norm = (volume7d / 50.0).clamp(0.0, 1.0);
+    return 0.90 + norm * 0.30;
+  }
+
+  // ── Age / Out-of-Print Factor ─────────────────────────────────────────────
+  // Vintage sets (Base Set era through Neo / ex) get a long-term growth lift
+  // modelled as 1.05^estimatedAge, capped at 1.15 lift.
+  static double computeAgeFactor(String setId) {
+    const _vintageSetPrefixes = [
+      'base', 'jungle', 'fossil', 'team-rocket', 'neo',
+      'gym', 'legend', 'ex', 'dp', 'hgss', 'bw',
+    ];
+    final lower = setId.toLowerCase();
+    for (final prefix in _vintageSetPrefixes) {
+      if (lower.startsWith(prefix)) return 1.15;
+    }
+    return 1.0;
+  }
+
+  // ── 12-Month Projection Curve ─────────────────────────────────────────────
+  // Returns 13 monthly price points (month 0 = current, month 12 = projected).
+  static List<ProjectionPoint> generateProjectionPoints({
+    required double currentPrice,
+    required double annualReturn,
+  }) {
+    final points = <ProjectionPoint>[];
+    for (int m = 0; m <= 12; m++) {
+      // Compound monthly: price * (1+r)^(m/12)
+      final factor = _pow(1.0 + annualReturn, m / 12.0);
+      points.add(ProjectionPoint(month: m, price: currentPrice * factor));
+    }
+    return points;
+  }
+
+  static double _pow(double base, double exp) {
+    if (exp == 0) return 1.0;
+    // dart:math pow returns num — use explicit cast
+    return math.pow(base, exp).toDouble();
   }
 }
 
@@ -479,6 +579,8 @@ Future<CardForecast> cardForecast(Ref ref, String cardId) async {
     currentPrice:        currentPrice,
     setId:               card.meta.setId,
     sentimentMultiplier: sentiment,
+    psaPop:              card.psaPop,
+    volume7d:            card.pricing.ebayUs?.volume7d?.toDouble(),
   );
 
   final benchmark = ForecastEngine.computeBenchmark(
