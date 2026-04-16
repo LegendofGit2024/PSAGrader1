@@ -64,7 +64,7 @@ final class CardForecastProvider
   }
 }
 
-String _$cardForecastHash() => r'fe3ad0b544c0c4d1aab547e1341ac630078fcca3';
+String _$cardForecastHash() => r'9f670cf39a3e2bf6c4d99b0dd9e30563c4be5e9b';
 
 final class CardForecastFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<CardForecast>, String> {
@@ -220,3 +220,55 @@ final class ForecastSearchResultsProvider
 
 String _$forecastSearchResultsHash() =>
     r'a50293672c0c3451c027b2225ac07266aa3f41db';
+
+@ProviderFor(ManualCardPrice)
+final manualCardPriceProvider = ManualCardPriceProvider._();
+
+final class ManualCardPriceProvider
+    extends $NotifierProvider<ManualCardPrice, Map<String, double>> {
+  ManualCardPriceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'manualCardPriceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$manualCardPriceHash();
+
+  @$internal
+  @override
+  ManualCardPrice create() => ManualCardPrice();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, double> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, double>>(value),
+    );
+  }
+}
+
+String _$manualCardPriceHash() => r'237da715e1f9084cd42ab422a1ef0e65456d3b1b';
+
+abstract class _$ManualCardPrice extends $Notifier<Map<String, double>> {
+  Map<String, double> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<Map<String, double>, Map<String, double>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Map<String, double>, Map<String, double>>,
+              Map<String, double>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

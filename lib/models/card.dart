@@ -110,6 +110,9 @@ abstract class CardMeta with _$CardMeta {
     required CardLanguage language,
     required String variant,
     @JsonKey(name: 'image_url') required String imageUrl,
+    /// Specialty classification tags (e.g. 'japanese', '1st_edition', 'error').
+    /// Applied automatically by the Kaggle importer and editable in-app.
+    @JsonKey(name: 'specialty_tags') @Default([]) List<String> specialtyTags,
   }) = _CardMeta;
 
   factory CardMeta.fromJson(Map<String, dynamic> json) =>
@@ -139,12 +142,13 @@ abstract class CardDocument with _$CardDocument {
     final rawMeta = raw['meta'] is Map
         ? Map<String, dynamic>.from(raw['meta'] as Map)
         : <String, dynamic>{};
-    rawMeta['name']       ??= '';
-    rawMeta['set_id']     ??= '';
-    rawMeta['set_number'] ??= '';
-    rawMeta['language']   ??= 'en';
-    rawMeta['variant']    ??= '';
-    rawMeta['image_url']  ??= '';
+    rawMeta['name']            ??= '';
+    rawMeta['set_id']          ??= '';
+    rawMeta['set_number']      ??= '';
+    rawMeta['language']        ??= 'en';
+    rawMeta['variant']         ??= '';
+    rawMeta['image_url']       ??= '';
+    rawMeta['specialty_tags']  ??= <String>[];
 
     final data = <String, dynamic>{
       // Inject the doc ID — toFirestore strips it so it's never in the document.

@@ -967,6 +967,10 @@ class _CardDetailContent extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
+        // Manual price entry (shown when no real price data exists)
+        _ManualPriceCard(cardId: forecast.card.id, currentPrice: forecast.projection.currentPrice),
+        const SizedBox(height: 12),
+
         // Card identity header
         _CardIdentityHeader(forecast: forecast),
         const SizedBox(height: 16),
@@ -1078,5 +1082,220 @@ class _CardIdentityHeader extends StatelessWidget {
         .animate()
         .fadeIn(duration: 300.ms)
         .slideY(begin: -0.05, end: 0);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Manual price entry card
+// ---------------------------------------------------------------------------
+
+class _ManualPriceCard extends ConsumerStatefulWidget {
+  const _ManualPriceCard({required this.cardId, required this.currentPrice});
+  final String cardId;
+  final double currentPrice;
+
+  @override
+  ConsumerState<_ManualPriceCard> createState() => _ManualPriceCardState();
+}
+
+class _ManualPriceCardState extends ConsumerState<_ManualPriceCard> {
+  final _ctrl = TextEditingController();
+  bool _editing = false;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final price = double.tryParse(_ctrl.text.replaceAll(',', ''));
+    if (price != null && price > 0) {
+      ref.read(manualCardPriceProvider.notifier).setPrice(widget.cardId, price);
+    }
+    setState(() => _editing = false);
+    FocusScope.of(context).unfocus();
+  }
+
+  void _clear() {
+    _ctrl.clear();
+    ref.read(manualCardPriceProvider.notifier).clearPrice(widget.cardId);
+    setState(() => _editing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final manualPrice = ref.watch(manualCardPriceProvider)[widget.cardId];
+    final hasRealPrice = widget.currentPrice > 0;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: manualPrice != null
+              ? AppColors.accent.withOpacity(0.5)
+              : AppColors.border,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.accentSoft.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.accentSoft.withOpacity(0.3)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.people_rounded, size: 10, color: AppColors.accentSoft),
+                    SizedBox(width: 4),
+                    Text(
+                      'COMMUNITY VERIFIED',
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentSoft,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              if (manualPrice != null)
+                GestureDetector(
+                  onTap: _clear,
+                  child: const Text(
+                    'Clear',
+                    style: TextStyle(fontSize: 11, color: AppColors.textDisabled),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (!hasRealPrice && manualPrice == null)
+            const Text(
+              'No live price data available. Enter the current price from '
+              'PriceCharting.com to run the forecast.',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            )
+          else
+            Text(
+              manualPrice != null
+                  ? 'Using your price: \$${manualPrice.toStringAsFixed(2)}'
+                  : 'Using live price: \$${widget.currentPrice.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 12,
+                color: manualPrice != null
+                    ? AppColors.accent
+                    : AppColors.textSecondary,
+              ),
+            ),
+          const SizedBox(height: 10),
+          if (_editing)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _ctrl,
+                    autofocus: true,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(
+                        color: AppColors.textPrimary, fontSize: 15),
+                    decoration: InputDecoration(
+                      hintText: 'e.g. 450.00',
+                      hintStyle: const TextStyle(
+                          color: AppColors.textDisabled, fontSize: 14),
+                      prefixText: '\$ ',
+                      prefixStyle: const TextStyle(
+                          color: AppColors.textSecondary, fontSize: 15),
+                      filled: true,
+                      fillColor: AppColors.surfaceVariant,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                            color: AppColors.accent, width: 1.5),
+                      ),
+                    ),
+                    onSubmitted: (_) => _submit(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _submit,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      'Set',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else
+            GestureDetector(
+              onTap: () => setState(() => _editing = true),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.edit_rounded,
+                        size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 6),
+                    Text(
+                      manualPrice != null
+                          ? 'Update price'
+                          : 'Enter price from PriceCharting',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

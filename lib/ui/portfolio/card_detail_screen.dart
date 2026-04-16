@@ -9,6 +9,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../models/card.dart';
 import '../../models/collection_item.dart';
 import '../../providers/collection_provider.dart';
+import '../../services/price_link_utility.dart';
 import '../theme/app_theme.dart';
 import 'widgets/slab_card_tile.dart';
 
@@ -198,6 +199,10 @@ class _CardBody extends StatelessWidget {
 
             // Financial summary
             _FinancialCard(item: item, card: card),
+            const SizedBox(height: 12),
+
+            // Live Price Check button
+            _LivePriceCheckButton(card: card),
             const SizedBox(height: 20),
 
             // Regional pricing
@@ -772,6 +777,57 @@ class _SectionHeader extends StatelessWidget {
         fontWeight: FontWeight.w800,
         color: AppColors.textDisabled,
         letterSpacing: 1.2,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Live Price Check button
+// ---------------------------------------------------------------------------
+
+class _LivePriceCheckButton extends StatelessWidget {
+  const _LivePriceCheckButton({required this.card});
+  final CardDocument card;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final launched = await PriceLinkUtility.checkCard(card);
+        if (!launched && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open browser'),
+              backgroundColor: AppColors.danger,
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.accent.withOpacity(0.4)),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.open_in_browser_rounded,
+                size: 16, color: AppColors.accent),
+            SizedBox(width: 8),
+            Text(
+              'Live Price Check  ·  PriceCharting.com',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.accent,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

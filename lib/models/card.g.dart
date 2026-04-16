@@ -117,6 +117,11 @@ _CardMeta _$CardMetaFromJson(Map<String, dynamic> json) => _CardMeta(
   language: $enumDecode(_$CardLanguageEnumMap, json['language']),
   variant: json['variant'] as String,
   imageUrl: json['image_url'] as String,
+  specialtyTags:
+      (json['specialty_tags'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$CardMetaToJson(_CardMeta instance) => <String, dynamic>{
@@ -126,6 +131,7 @@ Map<String, dynamic> _$CardMetaToJson(_CardMeta instance) => <String, dynamic>{
   'language': _$CardLanguageEnumMap[instance.language]!,
   'variant': instance.variant,
   'image_url': instance.imageUrl,
+  'specialty_tags': instance.specialtyTags,
 };
 
 const _$CardLanguageEnumMap = {

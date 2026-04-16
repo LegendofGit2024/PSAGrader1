@@ -1740,7 +1740,9 @@ as DateTime?,
 /// @nodoc
 mixin _$CardMeta {
 
- String get name;@JsonKey(name: 'set_id') String get setId;@JsonKey(name: 'set_number') String get setNumber;@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage get language; String get variant;@JsonKey(name: 'image_url') String get imageUrl;
+ String get name;@JsonKey(name: 'set_id') String get setId;@JsonKey(name: 'set_number') String get setNumber;@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage get language; String get variant;@JsonKey(name: 'image_url') String get imageUrl;/// Specialty classification tags (e.g. 'japanese', '1st_edition', 'error').
+/// Applied automatically by the Kaggle importer and editable in-app.
+@JsonKey(name: 'specialty_tags') List<String> get specialtyTags;
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1753,16 +1755,16 @@ $CardMetaCopyWith<CardMeta> get copyWith => _$CardMetaCopyWithImpl<CardMeta>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other.specialtyTags, specialtyTags));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl);
+int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl,const DeepCollectionEquality().hash(specialtyTags));
 
 @override
 String toString() {
-  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl)';
+  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl, specialtyTags: $specialtyTags)';
 }
 
 
@@ -1773,7 +1775,7 @@ abstract mixin class $CardMetaCopyWith<$Res>  {
   factory $CardMetaCopyWith(CardMeta value, $Res Function(CardMeta) _then) = _$CardMetaCopyWithImpl;
 @useResult
 $Res call({
- String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl
+ String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'specialty_tags') List<String> specialtyTags
 });
 
 
@@ -1790,7 +1792,7 @@ class _$CardMetaCopyWithImpl<$Res>
 
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,Object? specialtyTags = null,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,setId: null == setId ? _self.setId : setId // ignore: cast_nullable_to_non_nullable
@@ -1798,7 +1800,8 @@ as String,setNumber: null == setNumber ? _self.setNumber : setNumber // ignore: 
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as CardLanguage,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String,
+as String,specialtyTags: null == specialtyTags ? _self.specialtyTags : specialtyTags // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -1883,10 +1886,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CardMeta() when $default != null:
-return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl);case _:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags);case _:
   return orElse();
 
 }
@@ -1904,10 +1907,10 @@ return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.vari
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags)  $default,) {final _that = this;
 switch (_that) {
 case _CardMeta():
-return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl);case _:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1924,10 +1927,10 @@ return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.vari
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags)?  $default,) {final _that = this;
 switch (_that) {
 case _CardMeta() when $default != null:
-return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl);case _:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags);case _:
   return null;
 
 }
@@ -1939,7 +1942,7 @@ return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.vari
 @JsonSerializable()
 
 class _CardMeta implements CardMeta {
-  const _CardMeta({required this.name, @JsonKey(name: 'set_id') required this.setId, @JsonKey(name: 'set_number') required this.setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) required this.language, required this.variant, @JsonKey(name: 'image_url') required this.imageUrl});
+  const _CardMeta({required this.name, @JsonKey(name: 'set_id') required this.setId, @JsonKey(name: 'set_number') required this.setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) required this.language, required this.variant, @JsonKey(name: 'image_url') required this.imageUrl, @JsonKey(name: 'specialty_tags') final  List<String> specialtyTags = const []}): _specialtyTags = specialtyTags;
   factory _CardMeta.fromJson(Map<String, dynamic> json) => _$CardMetaFromJson(json);
 
 @override final  String name;
@@ -1948,6 +1951,17 @@ class _CardMeta implements CardMeta {
 @override@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) final  CardLanguage language;
 @override final  String variant;
 @override@JsonKey(name: 'image_url') final  String imageUrl;
+/// Specialty classification tags (e.g. 'japanese', '1st_edition', 'error').
+/// Applied automatically by the Kaggle importer and editable in-app.
+ final  List<String> _specialtyTags;
+/// Specialty classification tags (e.g. 'japanese', '1st_edition', 'error').
+/// Applied automatically by the Kaggle importer and editable in-app.
+@override@JsonKey(name: 'specialty_tags') List<String> get specialtyTags {
+  if (_specialtyTags is EqualUnmodifiableListView) return _specialtyTags;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_specialtyTags);
+}
+
 
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
@@ -1962,16 +1976,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other._specialtyTags, _specialtyTags));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl);
+int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl,const DeepCollectionEquality().hash(_specialtyTags));
 
 @override
 String toString() {
-  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl)';
+  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl, specialtyTags: $specialtyTags)';
 }
 
 
@@ -1982,7 +1996,7 @@ abstract mixin class _$CardMetaCopyWith<$Res> implements $CardMetaCopyWith<$Res>
   factory _$CardMetaCopyWith(_CardMeta value, $Res Function(_CardMeta) _then) = __$CardMetaCopyWithImpl;
 @override @useResult
 $Res call({
- String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl
+ String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'specialty_tags') List<String> specialtyTags
 });
 
 
@@ -1999,7 +2013,7 @@ class __$CardMetaCopyWithImpl<$Res>
 
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,Object? specialtyTags = null,}) {
   return _then(_CardMeta(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,setId: null == setId ? _self.setId : setId // ignore: cast_nullable_to_non_nullable
@@ -2007,7 +2021,8 @@ as String,setNumber: null == setNumber ? _self.setNumber : setNumber // ignore: 
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as CardLanguage,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String,
+as String,specialtyTags: null == specialtyTags ? _self._specialtyTags : specialtyTags // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

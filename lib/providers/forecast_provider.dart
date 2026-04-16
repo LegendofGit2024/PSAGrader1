@@ -875,7 +875,10 @@ Future<CardForecast> cardForecast(Ref ref, String cardId) async {
   final card = await fs.getCard(cardId);
   if (card == null) throw Exception('Card $cardId not found');
 
-  final currentPrice = card.pricing.ebayUs?.lastSoldNm ?? 0;
+  final manualPrices = ref.watch(manualCardPriceProvider);
+  final currentPrice = manualPrices[cardId]
+      ?? card.pricing.ebayUs?.lastSoldNm
+      ?? 0;
   final stats        = await _fetchMarketStats(cardId, currentPrice);
   final sentiment    = await _fetchSentimentMultiplier();
 
@@ -992,4 +995,29 @@ Future<List<CardDocument>> forecastSearchResults(Ref ref) async {
   final q = ref.watch(forecastSearchQueryProvider);
   if (q.length < 2) return [];
   return ref.read(firestoreServiceProvider).searchCards(nameQuery: q);
+}
+
+// ---------------------------------------------------------------------------
+// Manual price override — user enters price seen on PriceCharting
+// ---------------------------------------------------------------------------
+
+@riverpod
+class ManualCardPrice extends _$ManualCardPrice {
+  @override
+  Map<String, double> build() => {};
+
+  /// Set a manual price for a specific card ID.
+  void setPrice(String cardId, double price) {
+    state = {...state, cardId: price};
+  }
+
+  /// Clear the manual price for a card (revert to Firestore data).
+  void clearPrice(String cardId) {
+    final updated = Map<String, double>.from(state);
+    updated.remove(cardId);
+    state = updated;
+  }
+
+  /// Get the manual price for a card, or null if not set.
+  double? getPrice(String cardId) => state[cardId];
 }
