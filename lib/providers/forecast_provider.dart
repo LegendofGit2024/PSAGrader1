@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' show Color;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -240,6 +241,99 @@ class BenchmarkComparison {
 }
 
 /// Full forecast for a single card
+// ---------------------------------------------------------------------------
+// Slab projection result  (Supply/Demand driven)
+// ---------------------------------------------------------------------------
+
+class SlabProjectionResult {
+  const SlabProjectionResult({
+    required this.currentSlabPrice,
+    required this.vTrend,
+    required this.sFactor,
+    required this.projectedPrice,
+    required this.projectionPoints,
+    required this.dominantDriver,
+  });
+
+  /// The current market price for this specific grade.
+  final double currentSlabPrice;
+
+  /// Market momentum: composite of volume + 30-day price direction.
+  /// Negative = cooling, positive = heating. Roughly annual.
+  final double vTrend;
+
+  /// Scarcity multiplier from pop report (1.0 = no scarcity bonus).
+  final double sFactor;
+
+  /// 1-year projected price using: P × (1 + vTrend) × sFactor
+  final double projectedPrice;
+
+  /// Monthly curve for the selected projection window.
+  final List<ProjectionPoint> projectionPoints;
+
+  /// Plain-English label for the dominant signal.
+  final String dominantDriver;
+
+  double get returnPct => currentSlabPrice > 0
+      ? ((projectedPrice - currentSlabPrice) / currentSlabPrice) * 100
+      : 0;
+}
+
+// ---------------------------------------------------------------------------
+// Raw card arbitrage result  (Grading EV)
+// ---------------------------------------------------------------------------
+
+class RawArbitrageResult {
+  const RawArbitrageResult({
+    required this.rawPrice,
+    required this.psa10Price,
+    required this.psa9Price,
+    required this.gemRate,
+    required this.gradingFees,
+    required this.expectedValue,
+  });
+
+  /// Current raw NM price.
+  final double rawPrice;
+
+  /// Estimated market price for a PSA 10 copy.
+  final double psa10Price;
+
+  /// Estimated market price for a PSA 9 copy (safety-net grade).
+  final double psa9Price;
+
+  /// pop10 / totalPop — empirical probability of hitting a PSA 10.
+  final double gemRate;
+
+  /// Total grading cost: service fee + shipping + insurance.
+  final double gradingFees;
+
+  /// EV = (P_PSA10 × gemRate) + (P_PSA9 × [1 − gemRate]) − fees
+  final double expectedValue;
+
+  double get profitIfGraded => expectedValue - rawPrice;
+  double get roi => rawPrice > 0 ? (profitIfGraded / (rawPrice + gradingFees)) * 100 : 0;
+
+  bool get isMoonshot   => roi > 40 && gemRate >= 0.15;
+  bool get isWorthIt    => profitIfGraded > gradingFees && roi > 10;
+
+  String get verdict {
+    if (isMoonshot)  return '🚀 Moonshot';
+    if (isWorthIt)   return '✅ Worth Grading';
+    return '⚠️ Marginal';
+  }
+
+  Color get verdictColor {
+    if (isMoonshot)  return const Color(0xFFE8C547); // gold
+    if (isWorthIt)   return const Color(0xFF4CAF50); // green
+    return const Color(0xFFFF9800);                  // amber
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CardForecast (root)
+// ---------------------------------------------------------------------------
+
 class CardForecast {
   const CardForecast({
     required this.card,
@@ -248,6 +342,8 @@ class CardForecast {
     required this.projection,
     required this.priceHistory,
     required this.benchmark,
+    required this.slabProjection,
+    required this.rawArbitrage,
   });
 
   final CardDocument card;
@@ -256,6 +352,12 @@ class CardForecast {
   final ProjectionResult projection;
   final List<PricePoint> priceHistory;
   final BenchmarkComparison benchmark;
+
+  /// Supply/demand projection for graded copies (used when a grader is selected).
+  final SlabProjectionResult slabProjection;
+
+  /// Grading arbitrage EV for raw cards.
+  final RawArbitrageResult rawArbitrage;
 }
 
 // ---------------------------------------------------------------------------
@@ -503,8 +605,117 @@ class ForecastEngine {
 
   static double _pow(double base, double exp) {
     if (exp == 0) return 1.0;
-    // dart:math pow returns num — use explicit cast
     return math.pow(base, exp).toDouble();
+  }
+
+  // ── Slab Projection  (Supply / Demand driven) ─────────────────────────────
+  //
+  // Formula:  Value = P_Current × (1 + V_Trend) × S_Factor
+  //
+  // V_Trend (Market Momentum) = weighted blend of normalised volume and
+  //   30-day price direction.
+  //
+  // S_Factor (Scarcity) = 1 + (1 − gemRate) × 0.30
+  //   Where gemRate = pop10 / totalPop.  Low gem-rate → high scarcity bonus.
+  //
+  // For monthly curves: P_m = P_0 × effectiveReturn^(m/12)
+  //   effectiveReturn = (1 + V_Trend) × S_Factor
+  static SlabProjectionResult computeSlabProjection({
+    required double currentSlabPrice,
+    double? volume7d,
+    double? priceChange30d,   // fractional (0.08 = 8% rise)
+    int? pop10,
+    int? totalPop,
+    int years = 1,
+  }) {
+    final safePrice = currentSlabPrice > 0 ? currentSlabPrice : 1.0;
+
+    // ── V_Trend: market momentum ───────────────────────────────────────────
+    // Normalise weekly volume to 0–1 (50 sales/week = max confidence).
+    final normVol   = volume7d != null
+        ? (volume7d / 50.0).clamp(0.0, 1.0)
+        : 0.25; // fallback: modest activity
+    final priceDir  = (priceChange30d ?? 0.0).clamp(-0.50, 0.50);
+    // V_Trend is approximately annual (volume contributes to scale, direction
+    // from price momentum). Clamped to ±40%.
+    final vTrend    = (normVol * 0.5 + priceDir * 0.5).clamp(-0.25, 0.40);
+
+    // ── S_Factor: scarcity from pop report ────────────────────────────────
+    double sFactor = 1.0;
+    if (totalPop != null && totalPop > 0 && pop10 != null) {
+      final gemRate = (pop10 / totalPop).clamp(0.0, 1.0);
+      sFactor = 1.0 + (1.0 - gemRate) * 0.30;
+    }
+
+    // Effective annual return combining both drivers
+    final effectiveReturn = (1.0 + vTrend) * sFactor - 1.0;
+
+    final points = generateProjectionPoints(
+      currentPrice: safePrice,
+      annualReturn: effectiveReturn,
+      years: years,
+    );
+
+    final projectedPrice =
+        points.isNotEmpty ? points.last.price : safePrice;
+
+    final dominantDriver = vTrend > 0.15
+        ? 'High Momentum'
+        : sFactor > 1.20
+            ? 'Supply Squeeze'
+            : vTrend < -0.05
+                ? 'Cooling Market'
+                : 'Stable';
+
+    return SlabProjectionResult(
+      currentSlabPrice: safePrice,
+      vTrend:           vTrend,
+      sFactor:          sFactor,
+      projectedPrice:   projectedPrice,
+      projectionPoints: points,
+      dominantDriver:   dominantDriver,
+    );
+  }
+
+  // ── Raw Card Arbitrage  (Grading EV) ──────────────────────────────────────
+  //
+  // "If I sent this raw card to PSA, what would my average return be?"
+  //
+  // Formula:
+  //   EV = (P_PSA10 × G_Rate) + (P_PSA9 × [1 − G_Rate]) − C_Fees
+  //
+  // G_Rate (Gem Rate) = pop10 / totalPop  (empirical hit-rate for a 10)
+  // P_PSA10 / P_PSA9 = raw NM price × standard grade multipliers
+  // C_Fees  = grading service fee + shipping + insurance
+  static RawArbitrageResult computeRawArbitrage({
+    required double rawPrice,
+    int? pop10,
+    int? totalPop,
+    double gradingFees = 25.0, // PSA economy default (USD)
+  }) {
+    final safeRaw    = rawPrice > 0 ? rawPrice : 1.0;
+    final psa10Price = safeRaw * (kGradeMultipliers[GraderType.psa]![10]!);
+    final psa9Price  = safeRaw * (kGradeMultipliers[GraderType.psa]![9]!);
+
+    // Gem Rate: use pop report if available, else conservative 15%
+    final double gemRate;
+    if (pop10 != null && totalPop != null && totalPop > 0) {
+      gemRate = (pop10 / totalPop).clamp(0.01, 0.99);
+    } else {
+      gemRate = 0.15;
+    }
+
+    final expectedValue =
+        (psa10Price * gemRate) + (psa9Price * (1.0 - gemRate)) - gradingFees;
+
+    return RawArbitrageResult(
+      rawPrice:      safeRaw,
+      psa10Price:    psa10Price,
+      psa9Price:     psa9Price,
+      gemRate:       gemRate,
+      gradingFees:   gradingFees,
+      expectedValue: expectedValue,
+    );
   }
 }
 
@@ -699,13 +910,37 @@ Future<CardForecast> cardForecast(Ref ref, String cardId) async {
     projectedReturnPct: projection.returnPct,
   );
 
+  // Derive 30-day price change from history for slab momentum
+  double? priceChange30d;
+  if (history.length >= 2) {
+    final first = history.first.price;
+    final last  = history.last.price;
+    if (first > 0) priceChange30d = (last - first) / first;
+  }
+
+  final slabProjection = ForecastEngine.computeSlabProjection(
+    currentSlabPrice: currentPrice,
+    volume7d:         card.pricing.ebayUs?.volume7d?.toDouble(),
+    priceChange30d:   priceChange30d,
+    pop10:            card.psaPop?.pop10,
+    totalPop:         card.psaPop?.totalPop,
+  );
+
+  final rawArbitrage = ForecastEngine.computeRawArbitrage(
+    rawPrice:    currentPrice,
+    pop10:       card.psaPop?.pop10,
+    totalPop:    card.psaPop?.totalPop,
+  );
+
   return CardForecast(
-    card:         card,
-    heat:         heat,
-    signal:       signal,
-    projection:   projection,
-    priceHistory: history,
-    benchmark:    benchmark,
+    card:            card,
+    heat:            heat,
+    signal:          signal,
+    projection:      projection,
+    priceHistory:    history,
+    benchmark:       benchmark,
+    slabProjection:  slabProjection,
+    rawArbitrage:    rawArbitrage,
   );
 }
 

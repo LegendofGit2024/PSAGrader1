@@ -111,20 +111,41 @@ class _UnifiedPriceChartState extends State<UnifiedPriceChart> {
   }
 
   List<FlSpot> get _projSpots {
-    final mult =
-        _grader == GraderType.raw ? 1.0 : gradeMultiplier(_grader, _grade);
-    final annualReturn =
-        (widget.forecast.projection.returnPct / 100.0).clamp(-0.9, 10.0);
+    if (_grader == GraderType.raw) {
+      // Raw projection: CAGR-based formula (set age × sentiment × scarcity)
+      final annualReturn =
+          (widget.forecast.projection.returnPct / 100.0).clamp(-0.9, 10.0);
+      final points = ForecastEngine.generateProjectionPoints(
+        currentPrice: _rawPrice,
+        annualReturn: annualReturn,
+        years: _projPeriod.years,
+      );
+      return points.map((p) => FlSpot(p.month.toDouble(), p.price)).toList();
+    }
 
-    final points = ForecastEngine.generateProjectionPoints(
-      currentPrice: _rawPrice * mult,
-      annualReturn: annualReturn,
-      years: _projPeriod.years,
+    // Slab projection: supply/demand formula
+    // Apply grade multiplier to get the current slab price, then run
+    // the slab formula (V_Trend × S_Factor) for that specific grade.
+    final mult        = gradeMultiplier(_grader, _grade);
+    final slabPrice   = _rawPrice * mult;
+    final slabResult  = ForecastEngine.computeSlabProjection(
+      currentSlabPrice: slabPrice,
+      volume7d:         widget.forecast.card.pricing.ebayUs?.volume7d?.toDouble(),
+      priceChange30d:   _priceChange30d,
+      pop10:            widget.forecast.card.psaPop?.pop10,
+      totalPop:         widget.forecast.card.psaPop?.totalPop,
+      years:            _projPeriod.years,
     );
-
-    return points
+    return slabResult.projectionPoints
         .map((p) => FlSpot(p.month.toDouble(), p.price))
         .toList();
+  }
+
+  /// 30-day price change derived from the forecast's price history.
+  double? get _priceChange30d {
+    final h = widget.forecast.priceHistory;
+    if (h.length < 2 || h.first.price <= 0) return null;
+    return (h.last.price - h.first.price) / h.first.price;
   }
 
   // ── Y-axis bounds (always non-zero spread) ────────────────────────────────
@@ -601,6 +622,23 @@ class _UnifiedPriceChartState extends State<UnifiedPriceChart> {
             ),
           ],
 
+          // ── Slab signal strip (projected + graded) ───────────────────────
+          if (_mode == _ChartMode.projected && _grader != GraderType.raw) ...[
+            const SizedBox(height: 12),
+            _SlabSignalStrip(
+              grader: _grader,
+              grade: _grade,
+              forecast: widget.forecast,
+              projPeriod: _projPeriod,
+            ),
+          ],
+
+          // ── Raw arbitrage panel (projected + raw) ────────────────────────
+          if (_mode == _ChartMode.projected && _grader == GraderType.raw) ...[
+            const SizedBox(height: 12),
+            _RawArbitragePanel(arbitrage: widget.forecast.rawArbitrage),
+          ],
+
           // ── Projected disclaimer ─────────────────────────────────────────
           if (_mode == _ChartMode.projected) ...[
             const SizedBox(height: 10),
@@ -729,6 +767,382 @@ class _PillRow<T> extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Slab signal strip  (projected + grader selected)
+// ---------------------------------------------------------------------------
+
+class _SlabSignalStrip extends StatelessWidget {
+  const _SlabSignalStrip({
+    required this.grader,
+    required this.grade,
+    required this.forecast,
+    required this.projPeriod,
+  });
+  final GraderType grader;
+  final int grade;
+  final CardForecast forecast;
+  final _ProjPeriod projPeriod;
+
+  @override
+  Widget build(BuildContext context) {
+    final mult      = gradeMultiplier(grader, grade);
+    final raw       = forecast.projection.currentPrice > 0
+        ? forecast.projection.currentPrice
+        : 1.0;
+    final h         = forecast.priceHistory;
+    final change30d = h.length >= 2 && h.first.price > 0
+        ? (h.last.price - h.first.price) / h.first.price
+        : null;
+
+    final result = ForecastEngine.computeSlabProjection(
+      currentSlabPrice: raw * mult,
+      volume7d:         forecast.card.pricing.ebayUs?.volume7d?.toDouble(),
+      priceChange30d:   change30d,
+      pop10:            forecast.card.psaPop?.pop10,
+      totalPop:         forecast.card.psaPop?.totalPop,
+      years:            projPeriod.years,
+    );
+
+    final retColor = result.returnPct >= 0
+        ? const Color(0xFF4CAF50)
+        : const Color(0xFFF44336);
+    final sign = result.returnPct >= 0 ? '+' : '';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '${graderLabel(grader)} $grade  •  ${result.dominantDriver}',
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary),
+              ),
+              const Spacer(),
+              Text(
+                '$sign${result.returnPct.toStringAsFixed(1)}%',
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: retColor),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _StatChip(
+                label: 'Momentum (V)',
+                value: '${result.vTrend >= 0 ? '+' : ''}${(result.vTrend * 100).toStringAsFixed(1)}%',
+                color: result.vTrend >= 0
+                    ? const Color(0xFF4CAF50)
+                    : const Color(0xFFF44336),
+              ),
+              const SizedBox(width: 8),
+              _StatChip(
+                label: 'Scarcity (S)',
+                value: 'x${result.sFactor.toStringAsFixed(2)}',
+                color: result.sFactor > 1.1
+                    ? const Color(0xFF4CAF50)
+                    : AppColors.textDisabled,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Supply/demand model: momentum from volume + price direction, '
+            'amplified by pop-report scarcity.',
+            style: TextStyle(
+                fontSize: 10,
+                color: AppColors.textDisabled,
+                fontStyle: FontStyle.italic),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Raw card arbitrage panel  (projected + Raw selected)
+// ---------------------------------------------------------------------------
+
+class _RawArbitragePanel extends StatelessWidget {
+  const _RawArbitragePanel({required this.arbitrage});
+  final RawArbitrageResult arbitrage;
+
+  String _fmt(double v) {
+    if (v >= 1000) return '\$${(v / 1000).toStringAsFixed(1)}k';
+    return '\$${v.toStringAsFixed(0)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final posColor = const Color(0xFF4CAF50);
+    final negColor = const Color(0xFFF44336);
+    final profitColor =
+        arbitrage.profitIfGraded >= 0 ? posColor : negColor;
+    final gemPct = (arbitrage.gemRate * 100).toStringAsFixed(1);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Verdict header ───────────────────────────────────────────────
+          Row(
+            children: [
+              const Text(
+                'GRADING ARBITRAGE  (PSA)',
+                style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textDisabled,
+                    letterSpacing: 1.2),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: arbitrage.verdictColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      color: arbitrage.verdictColor.withOpacity(0.4)),
+                ),
+                child: Text(
+                  arbitrage.verdict,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: arbitrage.verdictColor),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // ── Formula breakdown ────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                _ArbRow(
+                  label: 'PSA 10 price',
+                  sub: 'if it grades a 10',
+                  value: _fmt(arbitrage.psa10Price),
+                  color: const Color(0xFFE8C547),
+                ),
+                const SizedBox(height: 6),
+                _ArbRow(
+                  label: 'PSA 9 price',
+                  sub: 'safety-net grade',
+                  value: _fmt(arbitrage.psa9Price),
+                  color: posColor,
+                ),
+                const SizedBox(height: 6),
+                _ArbRow(
+                  label: 'Gem Rate',
+                  sub: 'probability of hitting a 10',
+                  value: '$gemPct%',
+                  color: AppColors.accentSoft,
+                ),
+                const SizedBox(height: 6),
+                _ArbRow(
+                  label: 'Grading fees',
+                  sub: 'service + shipping + insurance',
+                  value: '-\$${arbitrage.gradingFees.toStringAsFixed(0)}',
+                  color: AppColors.textDisabled,
+                ),
+                const Divider(height: 16, color: AppColors.border),
+                _ArbRow(
+                  label: 'Expected Value (EV)',
+                  sub: '(P10 x GemRate) + (P9 x [1-GemRate]) - fees',
+                  value: _fmt(arbitrage.expectedValue),
+                  color: AppColors.accent,
+                  bold: true,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // ── Profit + ROI boxes ───────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: _StatBox(
+                  label: 'Profit if Graded',
+                  value: _fmt(arbitrage.profitIfGraded),
+                  color: profitColor,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatBox(
+                  label: 'ROI',
+                  value: '${arbitrage.roi.toStringAsFixed(0)}%',
+                  color: profitColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'The wider the PSA 10 vs raw gap and the higher the gem rate, '
+            'the stronger the case for grading. PSA 9 is the safety net.',
+            style: TextStyle(
+                fontSize: 10,
+                color: AppColors.textDisabled,
+                height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared micro-widgets
+// ---------------------------------------------------------------------------
+
+class _ArbRow extends StatelessWidget {
+  const _ArbRow({
+    required this.label,
+    required this.sub,
+    required this.value,
+    required this.color,
+    this.bold = false,
+  });
+  final String label, sub, value;
+  final Color color;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: bold
+                          ? FontWeight.w800
+                          : FontWeight.w600,
+                      color: AppColors.textPrimary)),
+              Text(sub,
+                  style: const TextStyle(
+                      fontSize: 10, color: AppColors.textDisabled)),
+            ],
+          ),
+        ),
+        Text(value,
+            style: TextStyle(
+                fontSize: bold ? 15 : 13,
+                fontWeight:
+                    bold ? FontWeight.w900 : FontWeight.w700,
+                color: color)),
+      ],
+    );
+  }
+}
+
+class _StatBox extends StatelessWidget {
+  const _StatBox(
+      {required this.label,
+      required this.value,
+      required this.color});
+  final String label, value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDisabled,
+                  letterSpacing: 1.0)),
+          const SizedBox(height: 3),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: color)),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  const _StatChip(
+      {required this.label,
+      required this.value,
+      required this.color});
+  final String label, value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.30)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 10, color: AppColors.textDisabled)),
+          const SizedBox(width: 6),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: color)),
+        ],
+      ),
     );
   }
 }
