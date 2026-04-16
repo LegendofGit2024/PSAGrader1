@@ -12,6 +12,76 @@ import '../services/firestore_service.dart';
 part 'forecast_provider.g.dart';
 
 // ---------------------------------------------------------------------------
+// Grader types + grade multipliers
+// ---------------------------------------------------------------------------
+
+enum GraderType { raw, psa, cgc, bgs, ace }
+
+/// Estimated price multipliers vs raw NM for each grader + grade.
+/// These are market-derived approximations; real values vary by card.
+const Map<GraderType, Map<int, double>> kGradeMultipliers = {
+  GraderType.psa: {10: 5.0, 9: 2.0, 8: 1.2, 7: 0.80, 6: 0.55},
+  GraderType.cgc: {10: 4.0, 9: 1.8, 8: 1.1, 7: 0.75, 6: 0.50},
+  GraderType.bgs: {10: 8.0, 9: 2.5, 8: 1.5, 7: 1.10, 6: 0.80},
+  GraderType.ace: {10: 4.5, 9: 1.9, 8: 1.1, 7: 0.75, 6: 0.50},
+};
+
+double gradeMultiplier(GraderType grader, int grade) {
+  if (grader == GraderType.raw) return 1.0;
+  return kGradeMultipliers[grader]?[grade] ?? 1.0;
+}
+
+String graderLabel(GraderType g) => switch (g) {
+  GraderType.raw => 'Raw',
+  GraderType.psa => 'PSA',
+  GraderType.cgc => 'CGC',
+  GraderType.bgs => 'BGS',
+  GraderType.ace => 'ACE',
+};
+
+// ---------------------------------------------------------------------------
+// Stub history generator (flexible day range)
+// ---------------------------------------------------------------------------
+
+/// Generates a plausible price history for [days] days ending at [currentPrice].
+/// Used when real Firestore data does not cover the requested period.
+List<PricePoint> generateStubHistoryForDays(double currentPrice, int days) {
+  final safePrice = currentPrice > 0 ? currentPrice : 1.0;
+  final now = DateTime.now();
+  final points = <PricePoint>[];
+
+  // How far below current price we start depends on look-back length
+  final startRatio = days <= 30
+      ? 0.88
+      : days <= 90
+          ? 0.80
+          : days <= 180
+              ? 0.70
+              : days <= 365
+                  ? 0.58
+                  : 0.35;
+
+  double p = safePrice * startRatio;
+
+  // Downsample for large ranges so spot count stays manageable
+  final step = days <= 90 ? 1 : days <= 365 ? 3 : 7;
+
+  for (int i = days; i >= 0; i -= step) {
+    final noise =
+        safePrice * 0.012 * (i % 7 == 0 ? 2.0 : 0.8) * (i.isEven ? 1 : -1);
+    final trendPull = (safePrice - p) * 0.04;
+    p = (p + trendPull + noise).clamp(safePrice * 0.1, safePrice * 3.0);
+    points.add(PricePoint(date: now.subtract(Duration(days: i)), price: p));
+  }
+
+  // Ensure the last point lands exactly at current price
+  if (points.isEmpty || points.last.price != safePrice) {
+    points.add(PricePoint(date: now, price: safePrice));
+  }
+  return points;
+}
+
+// ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 

@@ -64,7 +64,7 @@ final class CardForecastProvider
   }
 }
 
-String _$cardForecastHash() => r'd1164674ed0fdd77665b176a6de1731ff6045c81';
+String _$cardForecastHash() => r'fe3ad0b544c0c4d1aab547e1341ac630078fcca3';
 
 final class CardForecastFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<CardForecast>, String> {

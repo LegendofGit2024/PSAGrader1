@@ -13,7 +13,7 @@ import 'widgets/heat_index_tile.dart';
 import 'widgets/projection_tile.dart';
 import 'widgets/signal_card.dart';
 import 'widgets/sp500_compare_tile.dart';
-import 'widgets/trend_chart.dart';
+import 'widgets/unified_price_chart.dart';
 
 /// Crystal Ball — the Forecast Engine screen.
 ///
@@ -971,20 +971,9 @@ class _CardDetailContent extends StatelessWidget {
         _CardIdentityHeader(forecast: forecast),
         const SizedBox(height: 16),
 
-        // Unified historical + projection chart
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: UnifiedPriceChart(forecast: forecast),
-        ),
-        const SizedBox(height: 12),
-
-        // Factor breakdown (scarcity/velocity/age/sentiment chips + price boxes)
-        _ProjectionChartCard(projection: forecast.projection),
+        // Unified chart: historical (30D–5Y) + projected (1Y/5Y/10Y)
+        // with Raw / PSA / CGC / BGS / ACE grade toggles
+        UnifiedPriceChart(forecast: forecast),
         const SizedBox(height: 12),
 
         // BUY / HOLD / SELL signal card
@@ -995,208 +984,13 @@ class _CardDetailContent extends StatelessWidget {
         HeatIndexTile(heat: forecast.heat),
         const SizedBox(height: 12),
 
-        // 1-Year projection
+        // 1-Year projection summary tile
         ProjectionTile(projection: forecast.projection),
         const SizedBox(height: 12),
 
         // S&P 500 comparison toggle
         Sp500CompareTile(benchmark: forecast.benchmark),
       ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Price Projection Card (current vs 12-month + factor chips + fl_chart)
-// ---------------------------------------------------------------------------
-
-class _ProjectionChartCard extends StatelessWidget {
-  const _ProjectionChartCard({required this.projection});
-  final ProjectionResult projection;
-
-  @override
-  Widget build(BuildContext context) {
-    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
-    final returnPct = projection.returnPct;
-    final returnColor =
-        returnPct >= 0 ? AppColors.success : AppColors.danger;
-    final sign = returnPct >= 0 ? '+' : '';
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header ────────────────────────────────────────────────────────
-          Row(
-            children: [
-              Container(
-                width: 8, height: 8,
-                decoration: BoxDecoration(
-                  color: returnColor, shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: returnColor.withOpacity(0.6), blurRadius: 6),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '12-MONTH PRICE PROJECTION',
-                style: TextStyle(
-                  fontSize: 9, fontWeight: FontWeight.w700,
-                  color: AppColors.textDisabled, letterSpacing: 1.2,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // ── Current vs Projected ─────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: _PriceBox(
-                  label: 'CURRENT',
-                  price: fmt.format(projection.currentPrice),
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _PriceBox(
-                  label: 'TARGET (12M)',
-                  price: fmt.format(projection.projectedPrice1Y),
-                  color: returnColor,
-                  badge: '$sign${returnPct.toStringAsFixed(1)}%',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // ── Factor chips ─────────────────────────────────────────────────
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              _FactorChip(
-                label: 'Scarcity',
-                value: projection.scarcityMultiplier,
-                icon: '💎',
-              ),
-              _FactorChip(
-                label: 'Velocity',
-                value: projection.velocityMultiplier,
-                icon: '⚡',
-              ),
-              _FactorChip(
-                label: 'Age Lift',
-                value: projection.ageFactor,
-                icon: '📅',
-              ),
-              _FactorChip(
-                label: 'Sentiment',
-                value: projection.sentimentMultiplier,
-                icon: '📈',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-}
-
-class _PriceBox extends StatelessWidget {
-  const _PriceBox({
-    required this.label,
-    required this.price,
-    required this.color,
-    this.badge,
-  });
-  final String label;
-  final String price;
-  final Color color;
-  final String? badge;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 8, fontWeight: FontWeight.w700,
-                  color: AppColors.textDisabled, letterSpacing: 1.1)),
-          const SizedBox(height: 4),
-          Text(price,
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w900, color: color)),
-          if (badge != null) ...[
-            const SizedBox(height: 2),
-            Text(badge!,
-                style: TextStyle(
-                    fontSize: 10, fontWeight: FontWeight.w700, color: color)),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _FactorChip extends StatelessWidget {
-  const _FactorChip({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-  final String label;
-  final double value;
-  final String icon;
-
-  @override
-  Widget build(BuildContext context) {
-    // Colour: neutral at 1.0, green above, amber below
-    final color = value > 1.05
-        ? AppColors.success
-        : value < 0.95
-            ? AppColors.warning
-            : AppColors.textDisabled;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 11)),
-          const SizedBox(width: 4),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 9, color: AppColors.textDisabled)),
-          const SizedBox(width: 4),
-          Text('×${value.toStringAsFixed(2)}',
-              style: TextStyle(
-                  fontSize: 10, fontWeight: FontWeight.w700, color: color)),
-        ],
-      ),
     );
   }
 }
