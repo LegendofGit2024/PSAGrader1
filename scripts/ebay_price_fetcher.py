@@ -141,8 +141,8 @@ def build_query(
 # ---------------------------------------------------------------------------
 
 def fetch_sold_listings(
-    query:    str,
-    app_id:   str,
+    query:       str,
+    app_id:      str,
     max_results: int = _MAX_RESULTS,
 ) -> list[dict]:
     """
@@ -151,33 +151,34 @@ def fetch_sold_listings(
     Raises requests.HTTPError on non-2xx status.
     """
     params: dict[str, str | int] = {
-        "OPERATION-NAME":        "findCompletedItems",
-        "SERVICE-VERSION":       "1.0.0",
-        "SECURITY-APPNAME":      app_id,
-        "RESPONSE-DATA-FORMAT":  "JSON",
-        "REST-PAYLOAD":          "",
-        "keywords":              query,
-        # Filter 0: sold items only
-        "itemFilter(0).name":    "SoldItemsOnly",
-        "itemFilter(0).value":   "true",
-        # Filter 1: exclude auction bids (fixed-price + BIN gives cleaner comps)
-        # Comment this out if you want auction comps too.
-        # "itemFilter(1).name":  "ListingType",
-        # "itemFilter(1).value": "FixedPrice",
-        "sortOrder":             "EndTimeSoonest",
+        "OPERATION-NAME":                 "findCompletedItems",
+        "SERVICE-VERSION":                "1.0.0",
+        "SECURITY-APPNAME":               app_id,
+        "RESPONSE-DATA-FORMAT":           "JSON",
+        "keywords":                       query,
+        "itemFilter(0).name":             "SoldItemsOnly",
+        "itemFilter(0).value":            "true",
+        "sortOrder":                      "EndTimeSoonest",
         "paginationInput.entriesPerPage": max_results,
         "paginationInput.pageNumber":     1,
     }
 
-    resp = requests.get(_FINDING_API_URL, params=params, timeout=10)
-    resp.raise_for_status()
+    resp = requests.get(_FINDING_API_URL, params=params, timeout=15)
+
+    if not resp.ok:
+        # Print what eBay actually said to help diagnose future errors
+        try:
+            err_body = resp.json()
+            log.error("eBay API %s — %s", resp.status_code, err_body)
+        except Exception:
+            log.error("eBay API %s — %s", resp.status_code, resp.text[:300])
+        resp.raise_for_status()
+
     data = resp.json()
 
     try:
         search_result = (
-            data
-            ["findCompletedItemsResponse"][0]
-            ["searchResult"][0]
+            data["findCompletedItemsResponse"][0]["searchResult"][0]
         )
         return search_result.get("item", [])
     except (KeyError, IndexError, TypeError):
