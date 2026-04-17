@@ -925,19 +925,43 @@ _SET_TITLE_BLOCKLIST: dict[str, list[str]] = {
     ],
 }
 
+# These phrases disqualify a listing universally — applied to EVERY result
+# regardless of set.  Catches novelty / merchandise items that embed a grade
+# number in their title (e.g. "PSA 10 Keychains") and slip past query filters
+# because eBay ignores the surrounding emoji when matching exclusion keywords.
+_UNIVERSAL_TITLE_BLOCKLIST: list[str] = [
+    "keychain",
+    "key chain",
+    "keychains",
+    "sticker",
+    "pin badge",
+    "jumbo card",
+    "jumbo pack",
+    " online ",     # "online code" listings; spaces avoid clipping "online" in seller names
+]
+
 
 def validate_set_in_title(title: str, set_name: str) -> bool:
     """
-    Return True only if the title is NOT contaminated by a rival set.
+    Return True only if the title passes BOTH filters:
+      1. Universal blocklist — rejects non-card merchandise on every search.
+      2. Set-specific blocklist — rejects rival-set contamination.
 
-    Call this after fetching eBay results to discard cross-set pollution
-    that slipped past the query exclusions.
+    Call this after fetching eBay results to discard anything that slipped
+    past the query exclusions (e.g. emoji-wrapped keychain listings).
     """
-    blocklist = _SET_TITLE_BLOCKLIST.get(set_name, [])
     title_lower = title.lower()
-    for phrase in blocklist:
+
+    # ── Universal check (applies to all sets) ────────────────────────────
+    for phrase in _UNIVERSAL_TITLE_BLOCKLIST:
         if phrase.lower() in title_lower:
             return False
+
+    # ── Set-specific check ────────────────────────────────────────────────
+    for phrase in _SET_TITLE_BLOCKLIST.get(set_name, []):
+        if phrase.lower() in title_lower:
+            return False
+
     return True
 
 
