@@ -255,6 +255,10 @@ def build_query(
         excl = _SET_EXCLUSIONS.get(resolved_set, "")
         if excl:
             parts.append(excl)
+        # Year anchor for the original 1999 Base Set to surface vintage listings
+        # and push Celebrations / Classic Collection reprints out of results.
+        if resolved_set == "Base Set":
+            parts.append("1999")
 
     parts.append(card_name.strip())
     if number:
@@ -317,6 +321,10 @@ def build_graded_query(
         excl = _SET_EXCLUSIONS.get(resolved_set, "")
         if excl:
             parts.append(excl)
+        # "1999" year anchor for the original Base Set to push results toward
+        # the vintage market and away from modern reprints/Celebrations.
+        if resolved_set == "Base Set":
+            parts.append("1999")
 
     parts.append(card_name.strip())
     if number:
@@ -875,7 +883,11 @@ _SET_ID_TO_NAME: dict[str, str] = {
 # When searching for a specific set, append these exclusion terms so eBay
 # doesn't return cards from other sets that share the same card number.
 _SET_EXCLUSIONS: dict[str, str] = {
-    "Base Set":             '-"Base Set 2" -"Legendary Collection" -LC',
+    # Original WotC Base Set — exclude rival WotC sets AND 2021 Celebrations reprints.
+    "Base Set": (
+        '-"Base Set 2" -"Legendary Collection" -LC'
+        ' -Classic -Celebrations -25th -Anniversary -Reprint'
+    ),
     "Base Set 2":           '-"Legendary Collection" -"Team Rocket"',
     "Legendary Collection": '-"Base Set 2" -"Base Set"',
     "Team Rocket":          '-"Base Set" -"Base Set 2" -"Legendary Collection"',
@@ -886,11 +898,17 @@ _SET_EXCLUSIONS: dict[str, str] = {
 # After fetching, discard any eBay title that contains these phrases for the
 # given set — catches listings that slip past the query exclusions.
 _SET_TITLE_BLOCKLIST: dict[str, list[str]] = {
+    # Original 1999 WotC Base Set — hard-discard anything that looks like a
+    # rival WotC set or a 2021 Celebrations / Classic Collection reprint.
     "Base Set": [
         "base set 2",
         "legendary collection",
         "legendary coll",
-        " lc ",          # "LC" abbreviation surrounded by spaces
+        " lc ",           # "LC" abbreviation surrounded by spaces
+        "celebrations",   # 2021 Pokémon 25th anniversary reprint set
+        "classic",        # "Classic Collection" subset of Celebrations
+        "25th",           # anniversary sub-branding
+        "anniversary",    # catches "25th Anniversary" and similar
     ],
     "Base Set 2": [
         "legendary collection",
