@@ -289,7 +289,7 @@ def build_query(
         if all_hints:
             parts.append(f"({', '.join(all_hints)})")
         parts.append("-psa -cgc -bgs -graded -slab -cert")
-        parts.append("-lot -bundle -digital -code -keychain")
+        parts.append(_HARD_EXCLUSIONS)
 
     # GRADED queries are handled by build_graded_query() below — this branch
     # is only reached for RAW or BOTH (BOTH delegates to raw + graded separately).
@@ -346,7 +346,7 @@ def build_graded_query(
     else:
         parts.append("graded")
 
-    parts.append("-lot -bundle -digital -code -keychain")
+    parts.append(_HARD_EXCLUSIONS)
     return " ".join(parts)
 
 
@@ -875,6 +875,16 @@ _SET_ID_TO_NAME: dict[str, str] = {
     "sv7":      "Stellar Crown",
 }
 
+
+# ---------------------------------------------------------------------------
+# Hard exclusions — appended to EVERY query regardless of set or mode.
+# These product types are never card sales and must never reach our data.
+# ---------------------------------------------------------------------------
+
+_HARD_EXCLUSIONS = (
+    "-lot -bundle -digital -code"
+    " -keychain -sticker -pin -jumbo -online"
+)
 
 # ---------------------------------------------------------------------------
 # Set contamination — exclusions and title validation
