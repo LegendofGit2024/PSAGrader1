@@ -22,6 +22,7 @@ _EbayGradedPrice _$EbayGradedPriceFromJson(Map<String, dynamic> json) =>
     _EbayGradedPrice(
       psa10: (json['psa10'] as num?)?.toDouble(),
       psa9: (json['psa9'] as num?)?.toDouble(),
+      psa8: (json['psa8'] as num?)?.toDouble(),
       lastUpdated: const TimestampConverter().fromJson(json['last_updated']),
     );
 
@@ -29,6 +30,7 @@ Map<String, dynamic> _$EbayGradedPriceToJson(_EbayGradedPrice instance) =>
     <String, dynamic>{
       'psa10': instance.psa10,
       'psa9': instance.psa9,
+      'psa8': instance.psa8,
       'last_updated': const TimestampConverter().toJson(instance.lastUpdated),
     };
 

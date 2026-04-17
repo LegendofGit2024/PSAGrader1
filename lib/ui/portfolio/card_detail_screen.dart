@@ -506,9 +506,10 @@ class _EbayMarketSectionState extends State<_EbayMarketSection> {
         if (hasRaw && hasGraded && graded!.psa10 != null) ...[
           const SizedBox(height: 10),
           _GradingAlphaCard(
-            rawPrice:  raw!.lastSold!,
-            psa10:     graded.psa10!,
-            psa9:      graded.psa9,
+            rawPrice: raw!.lastSold!,
+            psa10:    graded.psa10!,
+            psa9:     graded.psa9,
+            psa8:     graded.psa8,
           ),
         ],
       ],
@@ -653,7 +654,15 @@ class _GradedPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasData = graded.psa10 != null || graded.psa9 != null;
+    final hasData =
+        graded.psa10 != null || graded.psa9 != null || graded.psa8 != null;
+
+    // Grade multipliers for a simple one-year projection chip
+    const kMultiplier = {
+      'psa10': 1.12,   // ~12 % annual appreciation at gem
+      'psa9':  1.08,
+      'psa8':  1.05,
+    };
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -665,12 +674,13 @@ class _GradedPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Row(
             children: [
               const Icon(Icons.workspace_premium_rounded,
                   size: 16, color: AppColors.accent),
               const SizedBox(width: 6),
-              const Text('Graded',
+              const Text('Graded Prices',
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -682,22 +692,122 @@ class _GradedPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          if (hasData)
-            Row(
-              children: [
-                _GradeStat(
-                  label: 'PSA / CGC 10',
-                  value: graded.psa10,
-                  highlight: true,
-                ),
-                const SizedBox(width: 12),
-                _GradeStat(label: 'PSA 9', value: graded.psa9),
-              ],
-            )
+          if (!hasData)
+            _BroadenSearchButton(cardName: cardName)
           else
-            _BroadenSearchButton(cardName: cardName),
+            Column(
+              children: [
+                // Each grade row is only rendered when that data exists
+                if (graded.psa10 != null)
+                  _GradeRow(
+                    label:      'PSA / CGC 10',
+                    sublabel:   'GEM MINT',
+                    price:      graded.psa10!,
+                    projected:  graded.psa10! * kMultiplier['psa10']!,
+                    highlight:  true,
+                  ),
+                if (graded.psa10 != null &&
+                    (graded.psa9 != null || graded.psa8 != null))
+                  const Divider(color: AppColors.border, height: 16),
+                if (graded.psa9 != null)
+                  _GradeRow(
+                    label:     'PSA 9',
+                    sublabel:  'MINT',
+                    price:     graded.psa9!,
+                    projected: graded.psa9! * kMultiplier['psa9']!,
+                  ),
+                if (graded.psa9 != null && graded.psa8 != null)
+                  const Divider(color: AppColors.border, height: 16),
+                if (graded.psa8 != null)
+                  _GradeRow(
+                    label:     'PSA 8',
+                    sublabel:  'NM-MT',
+                    price:     graded.psa8!,
+                    projected: graded.psa8! * kMultiplier['psa8']!,
+                  ),
+              ],
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _GradeRow extends StatelessWidget {
+  const _GradeRow({
+    required this.label,
+    required this.sublabel,
+    required this.price,
+    required this.projected,
+    this.highlight = false,
+  });
+  final String  label;
+  final String  sublabel;
+  final double  price;
+  final double  projected;
+  final bool    highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final gain    = projected - price;
+    final gainPct = (gain / price * 100).toStringAsFixed(1);
+
+    return Row(
+      children: [
+        // Grade label
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: highlight ? AppColors.accent : AppColors.textPrimary,
+              ),
+            ),
+            Text(
+              sublabel,
+              style: const TextStyle(
+                  fontSize: 10, color: AppColors.textDisabled),
+            ),
+          ],
+        ),
+        const Spacer(),
+
+        // Current price
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '\$${price.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: highlight ? AppColors.accent : AppColors.textPrimary,
+              ),
+            ),
+            // 2026 forecast chip
+            Container(
+              margin: const EdgeInsets.only(top: 3),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.success.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Text(
+                '2026 est. \$${projected.toStringAsFixed(0)}  (+$gainPct%)',
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.success,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -774,52 +884,6 @@ class _BroadenSearchButton extends StatelessWidget {
   }
 }
 
-class _GradeStat extends StatelessWidget {
-  const _GradeStat({
-    required this.label,
-    required this.value,
-    this.highlight = false,
-  });
-  final String  label;
-  final double? value;
-  final bool    highlight;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        decoration: BoxDecoration(
-          color: highlight
-              ? AppColors.accent.withOpacity(0.08)
-              : AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(10),
-          border: highlight
-              ? Border.all(color: AppColors.accent.withOpacity(0.3))
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 10, color: AppColors.textSecondary)),
-            const SizedBox(height: 4),
-            Text(
-              value != null ? '\$${value!.toStringAsFixed(2)}' : '—',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: highlight ? AppColors.accent : AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Grading Alpha — the price gap between raw and PSA 10.
 /// This is the core "is it worth grading?" signal.
 class _GradingAlphaCard extends StatelessWidget {
@@ -827,10 +891,12 @@ class _GradingAlphaCard extends StatelessWidget {
     required this.rawPrice,
     required this.psa10,
     this.psa9,
+    this.psa8,
   });
   final double  rawPrice;
   final double  psa10;
   final double? psa9;
+  final double? psa8;
 
   @override
   Widget build(BuildContext context) {

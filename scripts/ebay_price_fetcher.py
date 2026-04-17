@@ -70,47 +70,83 @@ class FetchMode(str, Enum):
     BOTH   = "both"    # run both queries (default for enrich_with_ebay_price)
 
 # ---------------------------------------------------------------------------
-# Regex: title classification (the "Keywords Trap" guard)
+# Grading classifier — scored hierarchy
 #
-# Rule: a grade NUMBER is only meaningful when a grading COMPANY appears
-# immediately adjacent. "10 near mint potential" must NOT match PSA 10.
+# Rule: a grade NUMBER is only meaningful when a grading COMPANY (or a
+# recognised semantic phrase like "GEM MINT") appears nearby.
+# "looks like a 10" or "Grade 10 potential" must NEVER reach psa10.
+#
+# Bucket priority:
+#   psa10  → PSA/CGC/BGS/ACE 10, GEM MINT, GEM 10, GEM-MT
+#   psa9   → PSA/CGC 9, MINT 9
+#   psa8   → PSA/CGC 8, NM-MT 8
+#   other  → grading company present but grade unclear → DISCARDED
+#   None   → no grading company at all → DISCARDED
+#
+# Patterns are tried in priority order — first match wins.
 # ---------------------------------------------------------------------------
 
-# Matches a grading company followed immediately by a number (PSA 10, CGC 9, etc.)
-_GRADED_REGEX = re.compile(
-    r'\b(PSA|CGC|BGS|ACE|SGC)\s*\d', re.IGNORECASE
+_GRADE_PATTERNS: list[tuple[re.Pattern, str]] = [
+    # ── PSA 10 bucket ────────────────────────────────────────────────────
+    (re.compile(r'\bPSA\s*10\b',             re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bCGC\s*10\b',             re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bBGS\s*10\b',             re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bACE\s*10\b',             re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bSGC\s*10\b',             re.IGNORECASE), 'psa10'),
+    # Semantic equivalents (no number required)
+    (re.compile(r'\bGEM\s*-?\s*MINT\b',      re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bGEM\s*10\b',             re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bGEM\s*-?\s*MT\b',        re.IGNORECASE), 'psa10'),
+    (re.compile(r'\bBGS\s*9\.5\b',           re.IGNORECASE), 'psa10'),  # BGS 9.5 = gem equiv
+
+    # ── PSA 9 bucket ─────────────────────────────────────────────────────
+    (re.compile(r'\bPSA\s*9\b(?!\s*[\.\d])', re.IGNORECASE), 'psa9'),   # PSA 9 but not PSA 9.5
+    (re.compile(r'\bCGC\s*9\b(?!\s*[\.\d])', re.IGNORECASE), 'psa9'),
+    (re.compile(r'\bBGS\s*9\b(?!\s*[\.\d])', re.IGNORECASE), 'psa9'),
+    (re.compile(r'\bSGC\s*9\b(?!\s*[\.\d])', re.IGNORECASE), 'psa9'),
+    (re.compile(r'\bMINT\s*9\b',             re.IGNORECASE), 'psa9'),
+
+    # ── PSA 8 bucket ─────────────────────────────────────────────────────
+    (re.compile(r'\bPSA\s*8\b',              re.IGNORECASE), 'psa8'),
+    (re.compile(r'\bCGC\s*8\b',              re.IGNORECASE), 'psa8'),
+    (re.compile(r'\bBGS\s*8\b',              re.IGNORECASE), 'psa8'),
+    (re.compile(r'\bSGC\s*8\b',              re.IGNORECASE), 'psa8'),
+    (re.compile(r'\bNM\s*-?\s*MT\s*8\b',     re.IGNORECASE), 'psa8'),
+    (re.compile(r'\bNM\s*MT\s*8\b',          re.IGNORECASE), 'psa8'),
+    (re.compile(r'\bNMMT\s*8\b',             re.IGNORECASE), 'psa8'),
+]
+
+# Catch-all: grading company present but grade doesn't match any bucket
+_GRADING_COMPANY_REGEX = re.compile(
+    r'\b(PSA|CGC|BGS|ACE|SGC)\b', re.IGNORECASE
 )
-# Specific grade buckets — company MUST appear next to the number
-_PSA10_REGEX  = re.compile(r'\bPSA\s*10\b',          re.IGNORECASE)
-_PSA9_REGEX   = re.compile(r'\bPSA\s*9\b(?!\s*\d)',  re.IGNORECASE)  # PSA 9 not PSA 9.5 etc
-_CGC10_REGEX  = re.compile(r'\bCGC\s*10\b',          re.IGNORECASE)
-_BGS10_REGEX  = re.compile(r'\bBGS\s*(?:10|9\.5)\b', re.IGNORECASE)
-_ACE10_REGEX  = re.compile(r'\bACE\s*10\b',          re.IGNORECASE)
+
+
+def classify_title(title: str) -> str | None:
+    """
+    Score and classify an eBay title using the grade hierarchy.
+
+    Returns:
+        'psa10'  — grade 10 / GEM MINT equivalents
+        'psa9'   — grade 9 / MINT 9
+        'psa8'   — grade 8 / NM-MT 8
+        'other'  — grading company found but grade unclear (safe to discard)
+        None     — no grading company found at all (not a graded listing)
+
+    NEVER defaults an ambiguous title to psa10.
+    """
+    for pattern, bucket in _GRADE_PATTERNS:
+        if pattern.search(title):
+            return bucket
+    # Company present but no clear grade — discard rather than guess
+    if _GRADING_COMPANY_REGEX.search(title):
+        return 'other'
+    return None  # not a graded listing
 
 
 def is_valid_graded_title(title: str) -> bool:
-    """
-    Return True only if the title explicitly pairs a grading company with a
-    grade number. Rejects titles like "looks like a 10" or "Grade 10 potential."
-    """
-    return bool(_GRADED_REGEX.search(title))
-
-
-def classify_title(title: str) -> str:
-    """
-    Bucket a verified graded title into 'psa10', 'psa9', or 'graded_other'.
-    Treat CGC 10 / BGS 10 / ACE 10 as equivalent to PSA 10 for pricing.
-    """
-    if (
-        _PSA10_REGEX.search(title)
-        or _CGC10_REGEX.search(title)
-        or _BGS10_REGEX.search(title)
-        or _ACE10_REGEX.search(title)
-    ):
-        return "psa10"
-    if _PSA9_REGEX.search(title):
-        return "psa9"
-    return "graded_other"
+    """True if the title belongs to a graded listing (any grade)."""
+    return classify_title(title) not in (None, 'other')
 
 # ---------------------------------------------------------------------------
 # eBay Browse API
@@ -420,28 +456,44 @@ def extract_prices(items: list[dict]) -> list[float]:
     return prices
 
 
-def extract_graded_prices(items: list[dict]) -> dict[str, list[float]]:
+def extract_graded_prices(
+    items:   list[dict],
+    verbose: bool = True,
+) -> dict[str, list[float]]:
     """
-    Extract prices from graded listings, bucketed by grade.
+    Score each eBay item title using the grade hierarchy and bucket prices.
 
-    Uses regex to validate that the grading company name appears adjacent to
-    the grade number — prevents "10 near mint potential" from polluting PSA 10
-    data.
+    Rules:
+    - Each title is classified by classify_title() — first regex match wins.
+    - 'other' titles (company present, grade unclear) are DISCARDED — never
+      allowed to pollute psa10.
+    - None titles (no grading company) are DISCARDED.
+    - Shipping is stripped from every price before bucketing.
 
     Returns:
-        {'psa10': [...], 'psa9': [...], 'other': [...]}
-        All lists are newest-first, shipping already stripped.
+        {'psa10': [...], 'psa9': [...], 'psa8': [...], 'other': [...]}
+        All lists are newest-first (API sort: newlyListed).
     """
-    buckets: dict[str, list[float]] = {"psa10": [], "psa9": [], "other": []}
+    buckets: dict[str, list[float]] = {
+        "psa10": [], "psa9": [], "psa8": [], "other": []
+    }
 
     for item in items:
-        title = item.get("title", "")
+        title  = item.get("title", "").strip()
+        bucket = classify_title(title)
 
-        # Hard gate: must have company + grade number together
-        if not is_valid_graded_title(title):
-            log.debug("Rejected (no valid grade company+number): %s", title[:60])
+        # ── Hard discard ─────────────────────────────────────────────────
+        if bucket is None:
+            log.debug("SKIP (no grading company): %s", title[:70])
+            continue
+        if bucket == "other":
+            if verbose:
+                print(f'  DISCARD (grade unclear): "{title[:70]}"')
+            else:
+                log.debug("DISCARD (grade unclear): %s", title[:70])
             continue
 
+        # ── Price extraction ──────────────────────────────────────────────
         try:
             item_price = float(item["price"]["value"])
         except (KeyError, TypeError, ValueError):
@@ -451,16 +503,29 @@ def extract_graded_prices(items: list[dict]) -> dict[str, list[float]]:
         try:
             opts = item.get("shippingOptions", [])
             if opts:
-                shipping = float(opts[0].get("shippingCost", {}).get("value", 0))
+                shipping = float(
+                    opts[0].get("shippingCost", {}).get("value", 0)
+                )
         except (TypeError, ValueError):
             pass
 
-        net = item_price - shipping
+        net = round(item_price - shipping, 2)
         if net < 0:
             continue
 
-        bucket = classify_title(title)
-        buckets[bucket if bucket != "graded_other" else "other"].append(net)
+        buckets[bucket].append(net)
+
+        # ── Real-time classification printout ────────────────────────────
+        if verbose:
+            label_map = {
+                "psa10": "PSA 10 / GEM",
+                "psa9":  "PSA 9",
+                "psa8":  "PSA 8",
+            }
+            print(f'  Found: "{title[:75]}"')
+            print(f"  -> Classified as: {label_map.get(bucket, bucket)}")
+            print(f"  -> Price: ${net:,.2f}")
+            print(f"  {'-'*50}")
 
     return buckets
 
@@ -505,11 +570,12 @@ def update_firestore_graded(
     card_id:    str,
     psa10:      float | None,
     psa9:       float | None,
+    psa8:       float | None = None,
     collection: str = "cards",
 ) -> None:
     """
-    Write pricing.ebay_us.graded.{psa10, psa9, last_updated} to Firestore.
-    Only writes fields that have a value — preserves existing fields.
+    Write pricing.ebay_us.graded.{psa10, psa9, psa8, last_updated} to Firestore.
+    Only writes fields that have a value — preserves any existing fields.
     """
     from google.cloud.firestore_v1 import SERVER_TIMESTAMP  # type: ignore
 
@@ -517,17 +583,23 @@ def update_firestore_graded(
     if psa10 is not None:
         graded["psa10"] = round(psa10, 2)
     if psa9 is not None:
-        graded["psa9"] = round(psa9, 2)
+        graded["psa9"]  = round(psa9,  2)
+    if psa8 is not None:
+        graded["psa8"]  = round(psa8,  2)
 
     ref = db.collection(collection).document(card_id)
     ref.set({"pricing": {"ebay_us": {"graded": graded}}}, merge=True)
 
-    parts = []
-    if psa10 is not None:
-        parts.append(f"PSA10=${psa10:.2f}")
-    if psa9 is not None:
-        parts.append(f"PSA9=${psa9:.2f}")
-    log.info("  [%s] GRADED %s → Firestore updated", card_id, ", ".join(parts) or "no data")
+    parts = [
+        f"PSA10=${psa10:.2f}" if psa10 is not None else None,
+        f"PSA9=${psa9:.2f}"   if psa9  is not None else None,
+        f"PSA8=${psa8:.2f}"   if psa8  is not None else None,
+    ]
+    log.info(
+        "  [%s] GRADED %s → Firestore updated",
+        card_id,
+        ", ".join(p for p in parts if p) or "no data",
+    )
 
 
 def flag_high_scarcity(
@@ -619,20 +691,24 @@ def enrich_with_ebay_price(
             name, set_id, number, client_id, client_secret, tags
         )
         log.debug("eBay graded (tier %d): %s", tier, graded_q)
-        buckets = extract_graded_prices(items)
+        buckets = extract_graded_prices(items, verbose=False)
         psa10   = median_of_last_n(buckets["psa10"])
         psa9    = median_of_last_n(buckets["psa9"])
+        psa8    = median_of_last_n(buckets["psa8"])
         graded: dict = {"last_updated": now}
         if psa10 is not None:
             graded["psa10"] = round(psa10, 2)
         if psa9 is not None:
-            graded["psa9"]  = round(psa9, 2)
+            graded["psa9"]  = round(psa9,  2)
+        if psa8 is not None:
+            graded["psa8"]  = round(psa8,  2)
         ebay["graded"] = graded
         log.info(
-            "  %-38s  PSA10=%s  PSA9=%s  (tier %d)",
-            name[:38],
+            "  %-34s  PSA10=%s  PSA9=%s  PSA8=%s  (tier %d)",
+            name[:34],
             f"${psa10:.2f}" if psa10 else "—",
             f"${psa9:.2f}"  if psa9  else "—",
+            f"${psa8:.2f}"  if psa8  else "—",
             tier,
         )
 
@@ -832,16 +908,20 @@ def _process_single(
                 name, set_id, number, client_id, client_secret, tags
             )
             print(f"  Query used (tier {tier}): {graded_q}")
-            buckets = extract_graded_prices(items)
+            # verbose=True → prints classification for each item in real-time
+            buckets = extract_graded_prices(items, verbose=True)
             psa10   = median_of_last_n(buckets["psa10"])
             psa9    = median_of_last_n(buckets["psa9"])
-            print(f"  PSA 10 prices : {[f'${p:.2f}' for p in buckets['psa10'][:5]]}")
-            print(f"  PSA 9  prices : {[f'${p:.2f}' for p in buckets['psa9'][:5]]}")
-            print(f"  PSA10 median  : {'$'+f'{psa10:.2f}' if psa10 else 'N/A'}")
-            print(f"  PSA9  median  : {'$'+f'{psa9:.2f}'  if psa9  else 'N/A'}")
-            if psa10 or psa9:
+            psa8    = median_of_last_n(buckets["psa8"])
+            print()
+            print(f"  ── Grade Summary ──────────────────────────────────")
+            print(f"  PSA10 median : {'$'+f'{psa10:.2f}' if psa10 else 'N/A'}  ({len(buckets['psa10'])} sales)")
+            print(f"  PSA9  median : {'$'+f'{psa9:.2f}'  if psa9  else 'N/A'}  ({len(buckets['psa9'])} sales)")
+            print(f"  PSA8  median : {'$'+f'{psa8:.2f}'  if psa8  else 'N/A'}  ({len(buckets['psa8'])} sales)")
+            print(f"  Discarded    : {len(buckets['other'])} titles (grade unclear)")
+            if psa10 or psa9 or psa8:
                 if not dry_run:
-                    update_firestore_graded(db, card_id, psa10, psa9, collection)
+                    update_firestore_graded(db, card_id, psa10, psa9, psa8, collection)
             else:
                 print("  No graded results on either tier")
                 if not dry_run:

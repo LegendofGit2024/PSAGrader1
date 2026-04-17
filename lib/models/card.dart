@@ -30,10 +30,12 @@ abstract class EbayRawPrice with _$EbayRawPrice {
 @freezed
 abstract class EbayGradedPrice with _$EbayGradedPrice {
   const factory EbayGradedPrice({
-    /// Median of PSA 10 / CGC 10 / BGS 10 recent sales.
+    /// Median of PSA 10 / CGC 10 / BGS 10 / GEM MINT recent sales.
     double? psa10,
-    /// Median of PSA 9 recent sales.
+    /// Median of PSA 9 / MINT 9 recent sales.
     double? psa9,
+    /// Median of PSA 8 / NM-MT 8 recent sales.
+    double? psa8,
     @JsonKey(name: 'last_updated') @TimestampConverter() DateTime? lastUpdated,
   }) = _EbayGradedPrice;
 

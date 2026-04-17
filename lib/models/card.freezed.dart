@@ -281,9 +281,10 @@ as DateTime?,
 /// @nodoc
 mixin _$EbayGradedPrice {
 
-/// Median of PSA 10 / CGC 10 / BGS 10 recent sales.
- double? get psa10;/// Median of PSA 9 recent sales.
- double? get psa9;@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? get lastUpdated;
+/// Median of PSA 10 / CGC 10 / BGS 10 / GEM MINT recent sales.
+ double? get psa10;/// Median of PSA 9 / MINT 9 recent sales.
+ double? get psa9;/// Median of PSA 8 / NM-MT 8 recent sales.
+ double? get psa8;@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? get lastUpdated;
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -296,16 +297,16 @@ $EbayGradedPriceCopyWith<EbayGradedPrice> get copyWith => _$EbayGradedPriceCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,psa10,psa9,lastUpdated);
+int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8,lastUpdated);
 
 @override
 String toString() {
-  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, lastUpdated: $lastUpdated)';
+  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, psa8: $psa8, lastUpdated: $lastUpdated)';
 }
 
 
@@ -316,7 +317,7 @@ abstract mixin class $EbayGradedPriceCopyWith<$Res>  {
   factory $EbayGradedPriceCopyWith(EbayGradedPrice value, $Res Function(EbayGradedPrice) _then) = _$EbayGradedPriceCopyWithImpl;
 @useResult
 $Res call({
- double? psa10, double? psa9,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+ double? psa10, double? psa9, double? psa8,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
 });
 
 
@@ -333,10 +334,11 @@ class _$EbayGradedPriceCopyWithImpl<$Res>
 
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? lastUpdated = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,Object? lastUpdated = freezed,}) {
   return _then(_self.copyWith(
 psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
 as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
+as double?,psa8: freezed == psa8 ? _self.psa8 : psa8 // ignore: cast_nullable_to_non_nullable
 as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -423,10 +425,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double? psa10,  double? psa9, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EbayGradedPrice() when $default != null:
-return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
+return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
   return orElse();
 
 }
@@ -444,10 +446,10 @@ return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double? psa10,  double? psa9, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)  $default,) {final _that = this;
 switch (_that) {
 case _EbayGradedPrice():
-return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
+return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -464,10 +466,10 @@ return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double? psa10,  double? psa9, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
 switch (_that) {
 case _EbayGradedPrice() when $default != null:
-return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
+return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
   return null;
 
 }
@@ -479,13 +481,15 @@ return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
 @JsonSerializable()
 
 class _EbayGradedPrice implements EbayGradedPrice {
-  const _EbayGradedPrice({this.psa10, this.psa9, @JsonKey(name: 'last_updated')@TimestampConverter() this.lastUpdated});
+  const _EbayGradedPrice({this.psa10, this.psa9, this.psa8, @JsonKey(name: 'last_updated')@TimestampConverter() this.lastUpdated});
   factory _EbayGradedPrice.fromJson(Map<String, dynamic> json) => _$EbayGradedPriceFromJson(json);
 
-/// Median of PSA 10 / CGC 10 / BGS 10 recent sales.
+/// Median of PSA 10 / CGC 10 / BGS 10 / GEM MINT recent sales.
 @override final  double? psa10;
-/// Median of PSA 9 recent sales.
+/// Median of PSA 9 / MINT 9 recent sales.
 @override final  double? psa9;
+/// Median of PSA 8 / NM-MT 8 recent sales.
+@override final  double? psa8;
 @override@JsonKey(name: 'last_updated')@TimestampConverter() final  DateTime? lastUpdated;
 
 /// Create a copy of EbayGradedPrice
@@ -501,16 +505,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,psa10,psa9,lastUpdated);
+int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8,lastUpdated);
 
 @override
 String toString() {
-  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, lastUpdated: $lastUpdated)';
+  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, psa8: $psa8, lastUpdated: $lastUpdated)';
 }
 
 
@@ -521,7 +525,7 @@ abstract mixin class _$EbayGradedPriceCopyWith<$Res> implements $EbayGradedPrice
   factory _$EbayGradedPriceCopyWith(_EbayGradedPrice value, $Res Function(_EbayGradedPrice) _then) = __$EbayGradedPriceCopyWithImpl;
 @override @useResult
 $Res call({
- double? psa10, double? psa9,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+ double? psa10, double? psa9, double? psa8,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
 });
 
 
@@ -538,10 +542,11 @@ class __$EbayGradedPriceCopyWithImpl<$Res>
 
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? lastUpdated = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,Object? lastUpdated = freezed,}) {
   return _then(_EbayGradedPrice(
 psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
 as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
+as double?,psa8: freezed == psa8 ? _self.psa8 : psa8 // ignore: cast_nullable_to_non_nullable
 as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
