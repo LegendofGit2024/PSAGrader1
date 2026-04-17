@@ -233,27 +233,61 @@ def build_query(
         if "error" in specialty_tags:
             tag_hints.append("error")
 
-    # Mode-specific inclusion keywords
     if mode == FetchMode.RAW:
-        mode_hints = ["raw", "ungraded", "nm", "near mint"]
-    elif mode == FetchMode.GRADED:
-        mode_hints = ["psa", "cgc", "bgs", "graded", "slab"]
-    else:
-        mode_hints = []
-
-    all_hints = list(dict.fromkeys(filter(None, [variant_hint] + tag_hints + mode_hints)))
-    if all_hints:
-        parts.append(f"({', '.join(all_hints)})")
-
-    # Mode-specific exclusions (prevent cross-contamination)
-    if mode == FetchMode.RAW:
+        # Raw: include condition hints, hard-exclude all grading companies
+        raw_hints = ["raw", "ungraded", "nm", "near mint"]
+        all_hints = list(dict.fromkeys(filter(None, [variant_hint] + tag_hints + raw_hints)))
+        if all_hints:
+            parts.append(f"({', '.join(all_hints)})")
         parts.append("-psa -cgc -bgs -graded -slab -cert")
-    elif mode == FetchMode.GRADED:
-        parts.append("-raw -ungraded")
+        parts.append("-lot -bundle -digital -code")
 
-    # Universal exclusions
-    parts.append("-lot -digital -code -bundle -collection")
+    # GRADED queries are handled by build_graded_query() below — this branch
+    # is only reached for RAW or BOTH (BOTH delegates to raw + graded separately).
 
+    return " ".join(parts)
+
+
+def build_graded_query(
+    card_name:      str,
+    set_name:       str,
+    number:         str,
+    specialty_tags: list[str] | None = None,
+    tier:           int = 1,
+) -> str:
+    """
+    Build a graded-specific eBay query.
+
+    Tier 1 (primary):  "{set} {name} {number} PSA 10 -lot -bundle -digital"
+    Tier 2 (fallback): "{set} {name} {number} graded  -lot -bundle -digital"
+
+    Specialty tags (1st edition, shadowless) are appended before the grade term
+    so eBay sees them as must-include context.
+    """
+    parts: list[str] = []
+    if set_name:
+        parts.append(set_name.strip())
+    parts.append(card_name.strip())
+    if number:
+        parts.append(number.strip())
+
+    # Specialty context
+    if specialty_tags:
+        if "1st_edition" in specialty_tags:
+            parts.append("\"1st edition\"")
+        if "shadowless" in specialty_tags:
+            parts.append("shadowless")
+        if "japanese" in specialty_tags:
+            parts.append("japanese")
+
+    # Grade term — kept as plain words (not parenthetical) so eBay treats
+    # them as required rather than optional OR terms.
+    if tier == 1:
+        parts.append("PSA 10")
+    else:
+        parts.append("graded")
+
+    parts.append("-lot -bundle -digital -code")
     return " ".join(parts)
 
 
@@ -303,6 +337,9 @@ def fetch_sold_listings(
 
     resp = requests.get(_BROWSE_API_URL, params=params, headers=headers, timeout=15)
 
+    # ── Debug output — paste the URL into a browser to verify results ──────
+    print(f"  DEBUG URL  : {resp.url}")
+
     if not resp.ok:
         try:
             err_body = resp.json()
@@ -311,8 +348,40 @@ def fetch_sold_listings(
             log.error("eBay Browse API %s — %s", resp.status_code, resp.text[:400])
         resp.raise_for_status()
 
-    data = resp.json()
+    data  = resp.json()
+    total = data.get("total", 0)
+    print(f"  DEBUG TOTAL: {total} results found by eBay")
+
     return data.get("itemSummaries", [])
+
+
+def fetch_graded_with_fallback(
+    card_name:      str,
+    set_name:       str,
+    number:         str,
+    client_id:      str,
+    client_secret:  str,
+    specialty_tags: list[str] | None = None,
+    max_results:    int = _MAX_RESULTS,
+) -> tuple[list[dict], str, int]:
+    """
+    Two-tier graded fetch.
+
+    Tier 1: "{set} {name} {number} PSA 10 -lot -bundle -digital"
+    Tier 2: "{set} {name} {number} graded  -lot -bundle -digital"  (if tier 1 = 0)
+
+    Returns (items, query_used, tier_used).
+    """
+    q1    = build_graded_query(card_name, set_name, number, specialty_tags, tier=1)
+    items = fetch_sold_listings(q1, client_id, client_secret, max_results)
+
+    if items:
+        return items, q1, 1
+
+    print("  Tier 1 returned 0 — trying fallback query …")
+    q2    = build_graded_query(card_name, set_name, number, specialty_tags, tier=2)
+    items = fetch_sold_listings(q2, client_id, client_secret, max_results)
+    return items, q2, 2
 
 
 # ---------------------------------------------------------------------------
@@ -544,9 +613,12 @@ def enrich_with_ebay_price(
             ebay["raw"] = {"last_sold": None, "last_updated": now}
             log.warning("  %-38s  RAW=0 results", name[:38])
 
-    # ── GRADED ────────────────────────────────────────────────────────────
+    # ── GRADED (two-tier fallback) ─────────────────────────────────────────
     if mode in (FetchMode.GRADED, FetchMode.BOTH):
-        items   = _fetch(FetchMode.GRADED)
+        items, graded_q, tier = fetch_graded_with_fallback(
+            name, set_id, number, client_id, client_secret, tags
+        )
+        log.debug("eBay graded (tier %d): %s", tier, graded_q)
         buckets = extract_graded_prices(items)
         psa10   = median_of_last_n(buckets["psa10"])
         psa9    = median_of_last_n(buckets["psa9"])
@@ -557,10 +629,11 @@ def enrich_with_ebay_price(
             graded["psa9"]  = round(psa9, 2)
         ebay["graded"] = graded
         log.info(
-            "  %-38s  PSA10=%s  PSA9=%s",
+            "  %-38s  PSA10=%s  PSA9=%s  (tier %d)",
             name[:38],
             f"${psa10:.2f}" if psa10 else "—",
             f"${psa9:.2f}"  if psa9  else "—",
+            tier,
         )
 
     # ── Scarcity flag ─────────────────────────────────────────────────────
@@ -733,9 +806,13 @@ def _process_single(
     print(f"\nCard   : {name or card_id}  [{card_id}]  mode={mode.value}")
 
     def _run_mode(m: FetchMode) -> None:
-        q      = build_query(name, set_id, number, rarity, tags, mode=m)
-        print(f"Query [{m.value:6}]: {q}")
-        items  = fetch_sold_listings(q, client_id, client_secret)
+        if m == FetchMode.GRADED:
+            # Graded uses its own two-tier builder — skip build_query
+            items = []  # populated inside the GRADED branch below
+        else:
+            q     = build_query(name, set_id, number, rarity, tags, mode=m)
+            print(f"Query [{m.value:6}]: {q}")
+            items = fetch_sold_listings(q, client_id, client_secret)
 
         if m == FetchMode.RAW:
             prices = extract_prices(items)
@@ -751,18 +828,22 @@ def _process_single(
                     flag_high_scarcity(db, card_id, FetchMode.RAW, collection)
 
         elif m == FetchMode.GRADED:
+            items, graded_q, tier = fetch_graded_with_fallback(
+                name, set_id, number, client_id, client_secret, tags
+            )
+            print(f"  Query used (tier {tier}): {graded_q}")
             buckets = extract_graded_prices(items)
             psa10   = median_of_last_n(buckets["psa10"])
             psa9    = median_of_last_n(buckets["psa9"])
-            print(f"  PSA 10 : {[f'${p:.2f}' for p in buckets['psa10'][:5]]}")
-            print(f"  PSA 9  : {[f'${p:.2f}' for p in buckets['psa9'][:5]]}")
-            print(f"  PSA10 median : {'$'+f'{psa10:.2f}' if psa10 else 'N/A'}")
-            print(f"  PSA9  median : {'$'+f'{psa9:.2f}'  if psa9  else 'N/A'}")
+            print(f"  PSA 10 prices : {[f'${p:.2f}' for p in buckets['psa10'][:5]]}")
+            print(f"  PSA 9  prices : {[f'${p:.2f}' for p in buckets['psa9'][:5]]}")
+            print(f"  PSA10 median  : {'$'+f'{psa10:.2f}' if psa10 else 'N/A'}")
+            print(f"  PSA9  median  : {'$'+f'{psa9:.2f}'  if psa9  else 'N/A'}")
             if psa10 or psa9:
                 if not dry_run:
                     update_firestore_graded(db, card_id, psa10, psa9, collection)
             else:
-                print("  No graded results")
+                print("  No graded results on either tier")
                 if not dry_run:
                     flag_high_scarcity(db, card_id, FetchMode.GRADED, collection)
 

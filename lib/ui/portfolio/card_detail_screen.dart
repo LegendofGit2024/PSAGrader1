@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../models/card.dart';
 import '../../models/collection_item.dart';
 import '../../providers/collection_provider.dart';
@@ -210,7 +212,10 @@ class _CardBody extends StatelessWidget {
                 card.pricing.ebayUs?.graded != null) ...[
               _SectionHeader(title: 'eBay Market Data'),
               const SizedBox(height: 10),
-              _EbayMarketSection(pricing: card.pricing),
+              _EbayMarketSection(
+                pricing: card.pricing,
+                cardName: card.meta.name,
+              ),
               const SizedBox(height: 20),
             ],
 
@@ -455,8 +460,9 @@ class _VertDivider extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _EbayMarketSection extends StatefulWidget {
-  const _EbayMarketSection({required this.pricing});
+  const _EbayMarketSection({required this.pricing, this.cardName = ''});
   final CardPricing pricing;
+  final String cardName;
 
   @override
   State<_EbayMarketSection> createState() => _EbayMarketSectionState();
@@ -488,7 +494,11 @@ class _EbayMarketSectionState extends State<_EbayMarketSection> {
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
           child: _showGraded
-              ? _GradedPanel(graded: graded!, key: const ValueKey('graded'))
+              ? _GradedPanel(
+                  graded: graded!,
+                  cardName: widget.cardName,
+                  key: const ValueKey('graded'),
+                )
               : _RawPanel(raw: raw, key: const ValueKey('raw')),
         ),
 
@@ -637,11 +647,14 @@ class _RawPanel extends StatelessWidget {
 }
 
 class _GradedPanel extends StatelessWidget {
-  const _GradedPanel({super.key, required this.graded});
+  const _GradedPanel({super.key, required this.graded, this.cardName = ''});
   final EbayGradedPrice graded;
+  final String cardName;
 
   @override
   Widget build(BuildContext context) {
+    final hasData = graded.psa10 != null || graded.psa9 != null;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -668,18 +681,94 @@ class _GradedPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              _GradeStat(
-                label: 'PSA / CGC 10',
-                value: graded.psa10,
-                highlight: true,
-              ),
-              const SizedBox(width: 12),
-              _GradeStat(label: 'PSA 9', value: graded.psa9),
-            ],
-          ),
+
+          if (hasData)
+            Row(
+              children: [
+                _GradeStat(
+                  label: 'PSA / CGC 10',
+                  value: graded.psa10,
+                  highlight: true,
+                ),
+                const SizedBox(width: 12),
+                _GradeStat(label: 'PSA 9', value: graded.psa9),
+              ],
+            )
+          else
+            _BroadenSearchButton(cardName: cardName),
         ],
+      ),
+    );
+  }
+}
+
+/// Shown in the graded panel when no PSA 10 / PSA 9 data was found.
+/// Opens a pre-built eBay completed-listings search in the browser so the
+/// user can browse manually and verify the card's graded value.
+class _BroadenSearchButton extends StatelessWidget {
+  const _BroadenSearchButton({required this.cardName});
+  final String cardName;
+
+  Future<void> _openEbay() async {
+    // Build a broad eBay completed-listings URL:
+    // Removes the card number and set prefix, searches only name + PSA
+    // so niche cards without a direct hit still surface graded comps.
+    final query = Uri.encodeComponent('$cardName PSA graded');
+    final uri   = Uri.parse(
+      'https://www.ebay.com/sch/i.html'
+      '?_nkw=$query'
+      '&LH_Complete=1'   // Completed listings
+      '&LH_Sold=1'       // Sold only
+      '&_sop=13'         // Sort: recently ended
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _openEbay,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.search_rounded,
+                size: 20, color: AppColors.textSecondary),
+            const SizedBox(height: 6),
+            const Text(
+              'No graded data found',
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.open_in_browser_rounded,
+                    size: 12, color: AppColors.accent),
+                const SizedBox(width: 4),
+                Text(
+                  'Broaden Search on eBay',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppColors.accent.withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
