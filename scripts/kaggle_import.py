@@ -366,9 +366,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fetch eBay sold prices and store median in pricing.ebay_us",
     )
     p.add_argument(
-        "--ebay-app-id",
-        default=os.environ.get("EBAY_APP_ID", ""),
-        help="eBay developer App ID (or set EBAY_APP_ID env var)",
+        "--ebay-client-id",
+        default=os.environ.get("EBAY_CLIENT_ID", os.environ.get("EBAY_APP_ID", "")),
+        help="eBay Client ID / App ID (or set EBAY_CLIENT_ID env var)",
+    )
+    p.add_argument(
+        "--ebay-client-secret",
+        default=os.environ.get("EBAY_CLIENT_SECRET", ""),
+        help="eBay Client Secret (or set EBAY_CLIENT_SECRET env var)",
     )
     # Per-field column overrides
     for field in _COLUMN_ALIASES:
@@ -484,10 +489,11 @@ def main() -> None:
     db = fb_firestore.client()
 
     # ── eBay validation ───────────────────────────────────────────────────
-    if args.fetch_ebay and not args.ebay_app_id:
+    if args.fetch_ebay and not (args.ebay_client_id and args.ebay_client_secret):
         log.error(
-            "--fetch-ebay requires an eBay App ID.  "
-            "Set EBAY_APP_ID env var or use --ebay-app-id."
+            "--fetch-ebay requires both EBAY_CLIENT_ID and EBAY_CLIENT_SECRET.\n"
+            "  $env:EBAY_CLIENT_ID     = 'NathanRo-s-PRD-f84c0e5fe-7b2339df'\n"
+            "  $env:EBAY_CLIENT_SECRET = 'PRD-your-secret-here'"
         )
         sys.exit(1)
 
@@ -510,7 +516,9 @@ def main() -> None:
             if args.fetch_ebay:
                 try:
                     from ebay_price_fetcher import enrich_with_ebay_price
-                    doc = enrich_with_ebay_price(doc, args.ebay_app_id)
+                    doc = enrich_with_ebay_price(
+                        doc, args.ebay_client_id, args.ebay_client_secret
+                    )
                 except Exception as ebay_err:
                     log.debug("eBay fetch failed for %s: %s", card_id, ebay_err)
 
