@@ -64,7 +64,7 @@ final class CardForecastProvider
   }
 }
 
-String _$cardForecastHash() => r'9f670cf39a3e2bf6c4d99b0dd9e30563c4be5e9b';
+String _$cardForecastHash() => r'9b42fedc2b89fad13354486af129fa4bca657272';
 
 final class CardForecastFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<CardForecast>, String> {
@@ -220,6 +220,74 @@ final class ForecastSearchResultsProvider
 
 String _$forecastSearchResultsHash() =>
     r'a50293672c0c3451c027b2225ac07266aa3f41db';
+
+/// Per-card variant selection state: cardId → [BaseSetVariant].
+/// Defaults to [BaseSetVariant.unlimited] when not set.
+
+@ProviderFor(SelectedVariant)
+final selectedVariantProvider = SelectedVariantProvider._();
+
+/// Per-card variant selection state: cardId → [BaseSetVariant].
+/// Defaults to [BaseSetVariant.unlimited] when not set.
+final class SelectedVariantProvider
+    extends $NotifierProvider<SelectedVariant, Map<String, BaseSetVariant>> {
+  /// Per-card variant selection state: cardId → [BaseSetVariant].
+  /// Defaults to [BaseSetVariant.unlimited] when not set.
+  SelectedVariantProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedVariantProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedVariantHash();
+
+  @$internal
+  @override
+  SelectedVariant create() => SelectedVariant();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, BaseSetVariant> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, BaseSetVariant>>(value),
+    );
+  }
+}
+
+String _$selectedVariantHash() => r'b4bbe04e78ddb78f63881bb5356fce88a0fbb291';
+
+/// Per-card variant selection state: cardId → [BaseSetVariant].
+/// Defaults to [BaseSetVariant.unlimited] when not set.
+
+abstract class _$SelectedVariant
+    extends $Notifier<Map<String, BaseSetVariant>> {
+  Map<String, BaseSetVariant> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref
+            as $Ref<Map<String, BaseSetVariant>, Map<String, BaseSetVariant>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                Map<String, BaseSetVariant>,
+                Map<String, BaseSetVariant>
+              >,
+              Map<String, BaseSetVariant>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
 
 @ProviderFor(ManualCardPrice)
 final manualCardPriceProvider = ManualCardPriceProvider._();

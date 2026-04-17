@@ -876,9 +876,13 @@ Future<CardForecast> cardForecast(Ref ref, String cardId) async {
   if (card == null) throw Exception('Card $cardId not found');
 
   final manualPrices = ref.watch(manualCardPriceProvider);
-  final currentPrice = manualPrices[cardId]
-      ?? card.pricing.ebayUs?.lastSoldNm
-      ?? 0;
+
+  // Variant-aware price resolution: manual override > sub-variant > graded > raw
+  final variant = ref.watch(selectedVariantProvider)[cardId]
+      ?? BaseSetVariant.unlimited;
+  final variantPrice = resolveVariantPrice(card, variant);
+
+  final currentPrice = (manualPrices[cardId] ?? variantPrice ?? 0).toDouble();
   final stats        = await _fetchMarketStats(cardId, currentPrice);
   final sentiment    = await _fetchSentimentMultiplier();
 
@@ -995,6 +999,75 @@ Future<List<CardDocument>> forecastSearchResults(Ref ref) async {
   final q = ref.watch(forecastSearchQueryProvider);
   if (q.length < 2) return [];
   return ref.read(firestoreServiceProvider).searchCards(nameQuery: q);
+}
+
+// ---------------------------------------------------------------------------
+// Base Set variant selection
+// ---------------------------------------------------------------------------
+
+/// Which print-run of a WotC Base Set card the user is pricing.
+enum BaseSetVariant {
+  unlimited,
+  shadowless,
+  firstEdition;
+
+  /// The key used in Firestore's pricing.ebay_us.graded.subvariants map.
+  String get firestoreKey => switch (this) {
+    BaseSetVariant.unlimited    => 'unlimited',
+    BaseSetVariant.shadowless   => 'shadowless',
+    BaseSetVariant.firstEdition => '1st_edition',
+  };
+
+  String get label => switch (this) {
+    BaseSetVariant.unlimited    => 'Unlimited',
+    BaseSetVariant.shadowless   => 'Shadowless',
+    BaseSetVariant.firstEdition => '1st Edition',
+  };
+}
+
+/// Returns true when [card] belongs to the original 1999 WotC Base Set
+/// and has at least one sub-variant price recorded in Firestore.
+bool cardHasBaseSetVariants(CardDocument card) {
+  if (card.meta.setId != 'base1') return false;
+  final sv = card.pricing.ebayUs?.graded?.subvariants ?? {};
+  return sv.values.any((v) => v.psa10 != null || v.psa9 != null || v.psa8 != null);
+}
+
+/// Resolve the best available price for a given [variant], falling back
+/// through PSA grades and then to the top-level graded/raw price.
+double? resolveVariantPrice(CardDocument card, BaseSetVariant variant) {
+  final graded = card.pricing.ebayUs?.graded;
+  if (graded != null) {
+    // Try the specific sub-variant bucket first (shadowless / 1st edition)
+    if (variant != BaseSetVariant.unlimited) {
+      final sv = graded.subvariants[variant.firestoreKey];
+      if (sv != null) {
+        final svPrice = sv.psa10 ?? sv.psa9 ?? sv.psa8;
+        if (svPrice != null) return svPrice;
+      }
+    }
+    // Fall through to top-level graded prices (unlimited baseline)
+    final gradedPrice = graded.psa10 ?? graded.psa9 ?? graded.psa8;
+    if (gradedPrice != null) return gradedPrice;
+  }
+  // Final fallback — raw/legacy fields
+  return card.pricing.ebayUs?.raw?.lastSold
+      ?? card.pricing.ebayUs?.lastSoldNm;
+}
+
+/// Per-card variant selection state: cardId → [BaseSetVariant].
+/// Defaults to [BaseSetVariant.unlimited] when not set.
+@riverpod
+class SelectedVariant extends _$SelectedVariant {
+  @override
+  Map<String, BaseSetVariant> build() => {};
+
+  void select(String cardId, BaseSetVariant variant) {
+    state = {...state, cardId: variant};
+  }
+
+  BaseSetVariant get(String cardId) =>
+      state[cardId] ?? BaseSetVariant.unlimited;
 }
 
 // ---------------------------------------------------------------------------

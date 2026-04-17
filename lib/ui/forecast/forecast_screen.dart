@@ -958,22 +958,37 @@ class _CardDetailPanel extends ConsumerWidget {
   }
 }
 
-class _CardDetailContent extends StatelessWidget {
+class _CardDetailContent extends ConsumerWidget {
   const _CardDetailContent({required this.forecast});
   final CardForecast forecast;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cardId        = forecast.card.id;
+    final showVariants  = cardHasBaseSetVariants(forecast.card);
+    final selectedVariant = ref.watch(selectedVariantProvider)[cardId]
+        ?? BaseSetVariant.unlimited;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
         // Manual price entry (shown when no real price data exists)
-        _ManualPriceCard(cardId: forecast.card.id, currentPrice: forecast.projection.currentPrice),
+        _ManualPriceCard(cardId: cardId, currentPrice: forecast.projection.currentPrice),
         const SizedBox(height: 12),
 
         // Card identity header
         _CardIdentityHeader(forecast: forecast),
         const SizedBox(height: 16),
+
+        // ── Base Set sub-variant toggle (1999 only) ───────────────────────
+        if (showVariants) ...[
+          _BaseSetVariantToggle(
+            cardId: cardId,
+            card: forecast.card,
+            selected: selectedVariant,
+          ),
+          const SizedBox(height: 12),
+        ],
 
         // Unified chart: historical (30D–5Y) + projected (1Y/5Y/10Y)
         // with Raw / PSA / CGC / BGS / ACE grade toggles
@@ -997,6 +1012,165 @@ class _CardDetailContent extends StatelessWidget {
       ],
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Base Set sub-variant toggle  (1st Edition / Shadowless / Unlimited)
+// ---------------------------------------------------------------------------
+
+class _BaseSetVariantToggle extends ConsumerWidget {
+  const _BaseSetVariantToggle({
+    required this.cardId,
+    required this.card,
+    required this.selected,
+  });
+
+  final String          cardId;
+  final CardDocument    card;
+  final BaseSetVariant  selected;
+
+  /// Returns the best price for [v] from the card's subvariants map,
+  /// or null when no data is recorded for that variant.
+  double? _priceFor(BaseSetVariant v) {
+    final sv = card.pricing.ebayUs?.graded?.subvariants[v.firestoreKey];
+    return sv?.psa10 ?? sv?.psa9 ?? sv?.psa8;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const variants = BaseSetVariant.values;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF16161E),
+        border: Border.all(color: const Color(0xFF2A2A38)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section label
+          Row(
+            children: [
+              const Text('🗓', style: TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              const Text(
+                '1999 PRINT RUN',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF7C6AF7),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              const Text(
+                'Tap to switch data source',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Color(0xFF8888A8),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Pill toggle row
+          Row(
+            children: variants.map((v) {
+              final price     = _priceFor(v);
+              final isActive  = v == selected;
+              final hasData   = price != null;
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => ref
+                      .read(selectedVariantProvider.notifier)
+                      .select(cardId, v),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? const Color(0xFF7C6AF7)
+                          : const Color(0xFF1E1E28),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isActive
+                            ? const Color(0xFF7C6AF7)
+                            : const Color(0xFF2A2A38),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          v.label,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: isActive
+                                ? Colors.white
+                                : const Color(0xFF8888A8),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          hasData
+                              ? '\$${price!.toStringAsFixed(0)}'
+                              : '—',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            color: isActive
+                                ? Colors.white
+                                : hasData
+                                    ? const Color(0xFFE8E8F0)
+                                    : const Color(0xFF4A4A60),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          // Active variant description
+          const SizedBox(height: 10),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            child: Text(
+              key: ValueKey(selected),
+              _variantDescription(selected),
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFF8888A8),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _variantDescription(BaseSetVariant v) => switch (v) {
+    BaseSetVariant.firstEdition =>
+      '1st Edition — stamped first print. Highest scarcity, commands a '
+      'significant premium over the Unlimited print.',
+    BaseSetVariant.shadowless =>
+      'Shadowless — transitional print between 1st Edition and Unlimited. '
+      'No shadow beneath the card art. Rarer than Unlimited.',
+    BaseSetVariant.unlimited =>
+      'Unlimited — standard mass-market print. Most common version; '
+      'used as the baseline price for this card.',
+  };
 }
 
 // ---------------------------------------------------------------------------
