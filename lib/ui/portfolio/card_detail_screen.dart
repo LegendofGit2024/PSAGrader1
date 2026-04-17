@@ -205,7 +205,16 @@ class _CardBody extends StatelessWidget {
             _LivePriceCheckButton(card: card),
             const SizedBox(height: 20),
 
-            // Regional pricing
+            // eBay Raw vs Graded split pricing
+            if (card.pricing.ebayUs?.raw != null ||
+                card.pricing.ebayUs?.graded != null) ...[
+              _SectionHeader(title: 'eBay Market Data'),
+              const SizedBox(height: 10),
+              _EbayMarketSection(pricing: card.pricing),
+              const SizedBox(height: 20),
+            ],
+
+            // Regional pricing (TCGplayer / Cardmarket / Yuyutei)
             if (card.pricing.tcgplayerUs != null ||
                 card.pricing.cardmarketEu != null ||
                 card.pricing.yuyuteiJp != null) ...[
@@ -438,6 +447,431 @@ class _VertDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(width: 1, height: 40, color: AppColors.border);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// eBay Raw / Graded toggle section
+// ---------------------------------------------------------------------------
+
+class _EbayMarketSection extends StatefulWidget {
+  const _EbayMarketSection({required this.pricing});
+  final CardPricing pricing;
+
+  @override
+  State<_EbayMarketSection> createState() => _EbayMarketSectionState();
+}
+
+class _EbayMarketSectionState extends State<_EbayMarketSection> {
+  bool _showGraded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final ebay   = widget.pricing.ebayUs;
+    final raw    = ebay?.raw;
+    final graded = ebay?.graded;
+    final hasRaw    = raw?.lastSold != null;
+    final hasGraded = graded?.psa10 != null || graded?.psa9 != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Toggle pill
+        if (hasRaw && hasGraded)
+          _ConditionToggle(
+            showGraded: _showGraded,
+            onChanged: (v) => setState(() => _showGraded = v),
+          ),
+        if (hasRaw && hasGraded) const SizedBox(height: 12),
+
+        // Price panel
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          child: _showGraded
+              ? _GradedPanel(graded: graded!, key: const ValueKey('graded'))
+              : _RawPanel(raw: raw, key: const ValueKey('raw')),
+        ),
+
+        // Grading Alpha — only visible when both datasets exist
+        if (hasRaw && hasGraded && graded!.psa10 != null) ...[
+          const SizedBox(height: 10),
+          _GradingAlphaCard(
+            rawPrice:  raw!.lastSold!,
+            psa10:     graded.psa10!,
+            psa9:      graded.psa9,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ConditionToggle extends StatelessWidget {
+  const _ConditionToggle({
+    required this.showGraded,
+    required this.onChanged,
+  });
+  final bool showGraded;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 36,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          _ToggleBtn(
+            label: 'Raw',
+            icon: Icons.style_outlined,
+            active: !showGraded,
+            onTap: () => onChanged(false),
+          ),
+          _ToggleBtn(
+            label: 'Graded',
+            icon: Icons.workspace_premium_rounded,
+            active: showGraded,
+            onTap: () => onChanged(true),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToggleBtn extends StatelessWidget {
+  const _ToggleBtn({
+    required this.label,
+    required this.icon,
+    required this.active,
+    required this.onTap,
+  });
+  final String   label;
+  final IconData icon;
+  final bool     active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: active ? AppColors.accent.withOpacity(0.15) : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            border: active
+                ? Border.all(color: AppColors.accent.withOpacity(0.5))
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon,
+                  size: 13,
+                  color: active ? AppColors.accent : AppColors.textSecondary),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: active ? AppColors.accent : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RawPanel extends StatelessWidget {
+  const _RawPanel({super.key, required this.raw});
+  final EbayRawPrice? raw;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.style_outlined, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Raw (Ungraded)',
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              const SizedBox(height: 3),
+              Text(
+                raw?.lastSold != null
+                    ? '\$${raw!.lastSold!.toStringAsFixed(2)}'
+                    : '—',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          const Text('eBay median · last 5 sales',
+              style: TextStyle(fontSize: 10, color: AppColors.textDisabled)),
+        ],
+      ),
+    );
+  }
+}
+
+class _GradedPanel extends StatelessWidget {
+  const _GradedPanel({super.key, required this.graded});
+  final EbayGradedPrice graded;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.workspace_premium_rounded,
+                  size: 16, color: AppColors.accent),
+              const SizedBox(width: 6),
+              const Text('Graded',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textSecondary)),
+              const Spacer(),
+              const Text('eBay median · last 5 sales',
+                  style: TextStyle(fontSize: 10, color: AppColors.textDisabled)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _GradeStat(
+                label: 'PSA / CGC 10',
+                value: graded.psa10,
+                highlight: true,
+              ),
+              const SizedBox(width: 12),
+              _GradeStat(label: 'PSA 9', value: graded.psa9),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GradeStat extends StatelessWidget {
+  const _GradeStat({
+    required this.label,
+    required this.value,
+    this.highlight = false,
+  });
+  final String  label;
+  final double? value;
+  final bool    highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        decoration: BoxDecoration(
+          color: highlight
+              ? AppColors.accent.withOpacity(0.08)
+              : AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(10),
+          border: highlight
+              ? Border.all(color: AppColors.accent.withOpacity(0.3))
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 10, color: AppColors.textSecondary)),
+            const SizedBox(height: 4),
+            Text(
+              value != null ? '\$${value!.toStringAsFixed(2)}' : '—',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: highlight ? AppColors.accent : AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Grading Alpha — the price gap between raw and PSA 10.
+/// This is the core "is it worth grading?" signal.
+class _GradingAlphaCard extends StatelessWidget {
+  const _GradingAlphaCard({
+    required this.rawPrice,
+    required this.psa10,
+    this.psa9,
+  });
+  final double  rawPrice;
+  final double  psa10;
+  final double? psa9;
+
+  @override
+  Widget build(BuildContext context) {
+    final alpha     = psa10 - rawPrice;
+    final alphaSign = alpha >= 0 ? '+' : '';
+    final roiPct    = rawPrice > 0 ? (alpha / rawPrice * 100) : 0.0;
+    final isWorth   = alpha > 25;          // rough rule: only worth if >$25 upside
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isWorth
+            ? AppColors.success.withOpacity(0.06)
+            : AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isWorth
+              ? AppColors.success.withOpacity(0.35)
+              : AppColors.border,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isWorth
+                    ? Icons.trending_up_rounded
+                    : Icons.trending_flat_rounded,
+                size: 14,
+                color: isWorth ? AppColors.success : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Grading Alpha',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isWorth ? AppColors.success : AppColors.textSecondary,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isWorth
+                      ? AppColors.success.withOpacity(0.15)
+                      : AppColors.surface,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  isWorth ? 'Worth Grading' : 'Marginal',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color:
+                        isWorth ? AppColors.success : AppColors.textDisabled,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _AlphaStat('Raw', '\$${rawPrice.toStringAsFixed(2)}'),
+              const _Arrow(),
+              _AlphaStat('PSA 10', '\$${psa10.toStringAsFixed(2)}',
+                  accent: true),
+              const SizedBox(width: 16),
+              _AlphaStat(
+                'Upside',
+                '$alphaSign\$${alpha.toStringAsFixed(2)}',
+                sub: '${alphaSign}${roiPct.toStringAsFixed(0)}% ROI',
+                accent: isWorth,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 200.ms);
+  }
+}
+
+class _AlphaStat extends StatelessWidget {
+  const _AlphaStat(this.label, this.value,
+      {this.sub, this.accent = false});
+  final String  label;
+  final String  value;
+  final String? sub;
+  final bool    accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(
+                fontSize: 10, color: AppColors.textSecondary)),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: accent ? AppColors.success : AppColors.textPrimary,
+          ),
+        ),
+        if (sub != null)
+          Text(sub!,
+              style: const TextStyle(
+                  fontSize: 10, color: AppColors.textDisabled)),
+      ],
+    );
+  }
+}
+
+class _Arrow extends StatelessWidget {
+  const _Arrow();
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: Icon(Icons.arrow_forward_rounded,
+          size: 14, color: AppColors.textDisabled),
+    );
   }
 }
 

@@ -13,8 +13,549 @@ part of 'card.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$EbayRawPrice {
+
+@JsonKey(name: 'last_sold') double? get lastSold;@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? get lastUpdated;
+/// Create a copy of EbayRawPrice
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EbayRawPriceCopyWith<EbayRawPrice> get copyWith => _$EbayRawPriceCopyWithImpl<EbayRawPrice>(this as EbayRawPrice, _$identity);
+
+  /// Serializes this EbayRawPrice to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayRawPrice&&(identical(other.lastSold, lastSold) || other.lastSold == lastSold)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,lastSold,lastUpdated);
+
+@override
+String toString() {
+  return 'EbayRawPrice(lastSold: $lastSold, lastUpdated: $lastUpdated)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EbayRawPriceCopyWith<$Res>  {
+  factory $EbayRawPriceCopyWith(EbayRawPrice value, $Res Function(EbayRawPrice) _then) = _$EbayRawPriceCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'last_sold') double? lastSold,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+});
+
+
+
+
+}
+/// @nodoc
+class _$EbayRawPriceCopyWithImpl<$Res>
+    implements $EbayRawPriceCopyWith<$Res> {
+  _$EbayRawPriceCopyWithImpl(this._self, this._then);
+
+  final EbayRawPrice _self;
+  final $Res Function(EbayRawPrice) _then;
+
+/// Create a copy of EbayRawPrice
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? lastSold = freezed,Object? lastUpdated = freezed,}) {
+  return _then(_self.copyWith(
+lastSold: freezed == lastSold ? _self.lastSold : lastSold // ignore: cast_nullable_to_non_nullable
+as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [EbayRawPrice].
+extension EbayRawPricePatterns on EbayRawPrice {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EbayRawPrice value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EbayRawPrice() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EbayRawPrice value)  $default,){
+final _that = this;
+switch (_that) {
+case _EbayRawPrice():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EbayRawPrice value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EbayRawPrice() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'last_sold')  double? lastSold, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EbayRawPrice() when $default != null:
+return $default(_that.lastSold,_that.lastUpdated);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'last_sold')  double? lastSold, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)  $default,) {final _that = this;
+switch (_that) {
+case _EbayRawPrice():
+return $default(_that.lastSold,_that.lastUpdated);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'last_sold')  double? lastSold, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
+switch (_that) {
+case _EbayRawPrice() when $default != null:
+return $default(_that.lastSold,_that.lastUpdated);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _EbayRawPrice implements EbayRawPrice {
+  const _EbayRawPrice({@JsonKey(name: 'last_sold') this.lastSold, @JsonKey(name: 'last_updated')@TimestampConverter() this.lastUpdated});
+  factory _EbayRawPrice.fromJson(Map<String, dynamic> json) => _$EbayRawPriceFromJson(json);
+
+@override@JsonKey(name: 'last_sold') final  double? lastSold;
+@override@JsonKey(name: 'last_updated')@TimestampConverter() final  DateTime? lastUpdated;
+
+/// Create a copy of EbayRawPrice
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EbayRawPriceCopyWith<_EbayRawPrice> get copyWith => __$EbayRawPriceCopyWithImpl<_EbayRawPrice>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$EbayRawPriceToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayRawPrice&&(identical(other.lastSold, lastSold) || other.lastSold == lastSold)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,lastSold,lastUpdated);
+
+@override
+String toString() {
+  return 'EbayRawPrice(lastSold: $lastSold, lastUpdated: $lastUpdated)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EbayRawPriceCopyWith<$Res> implements $EbayRawPriceCopyWith<$Res> {
+  factory _$EbayRawPriceCopyWith(_EbayRawPrice value, $Res Function(_EbayRawPrice) _then) = __$EbayRawPriceCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'last_sold') double? lastSold,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+});
+
+
+
+
+}
+/// @nodoc
+class __$EbayRawPriceCopyWithImpl<$Res>
+    implements _$EbayRawPriceCopyWith<$Res> {
+  __$EbayRawPriceCopyWithImpl(this._self, this._then);
+
+  final _EbayRawPrice _self;
+  final $Res Function(_EbayRawPrice) _then;
+
+/// Create a copy of EbayRawPrice
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? lastSold = freezed,Object? lastUpdated = freezed,}) {
+  return _then(_EbayRawPrice(
+lastSold: freezed == lastSold ? _self.lastSold : lastSold // ignore: cast_nullable_to_non_nullable
+as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$EbayGradedPrice {
+
+/// Median of PSA 10 / CGC 10 / BGS 10 recent sales.
+ double? get psa10;/// Median of PSA 9 recent sales.
+ double? get psa9;@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? get lastUpdated;
+/// Create a copy of EbayGradedPrice
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EbayGradedPriceCopyWith<EbayGradedPrice> get copyWith => _$EbayGradedPriceCopyWithImpl<EbayGradedPrice>(this as EbayGradedPrice, _$identity);
+
+  /// Serializes this EbayGradedPrice to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,psa10,psa9,lastUpdated);
+
+@override
+String toString() {
+  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, lastUpdated: $lastUpdated)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EbayGradedPriceCopyWith<$Res>  {
+  factory $EbayGradedPriceCopyWith(EbayGradedPrice value, $Res Function(EbayGradedPrice) _then) = _$EbayGradedPriceCopyWithImpl;
+@useResult
+$Res call({
+ double? psa10, double? psa9,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+});
+
+
+
+
+}
+/// @nodoc
+class _$EbayGradedPriceCopyWithImpl<$Res>
+    implements $EbayGradedPriceCopyWith<$Res> {
+  _$EbayGradedPriceCopyWithImpl(this._self, this._then);
+
+  final EbayGradedPrice _self;
+  final $Res Function(EbayGradedPrice) _then;
+
+/// Create a copy of EbayGradedPrice
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? lastUpdated = freezed,}) {
+  return _then(_self.copyWith(
+psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
+as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
+as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [EbayGradedPrice].
+extension EbayGradedPricePatterns on EbayGradedPrice {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EbayGradedPrice value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EbayGradedPrice() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EbayGradedPrice value)  $default,){
+final _that = this;
+switch (_that) {
+case _EbayGradedPrice():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EbayGradedPrice value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EbayGradedPrice() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double? psa10,  double? psa9, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EbayGradedPrice() when $default != null:
+return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double? psa10,  double? psa9, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)  $default,) {final _that = this;
+switch (_that) {
+case _EbayGradedPrice():
+return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double? psa10,  double? psa9, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
+switch (_that) {
+case _EbayGradedPrice() when $default != null:
+return $default(_that.psa10,_that.psa9,_that.lastUpdated);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _EbayGradedPrice implements EbayGradedPrice {
+  const _EbayGradedPrice({this.psa10, this.psa9, @JsonKey(name: 'last_updated')@TimestampConverter() this.lastUpdated});
+  factory _EbayGradedPrice.fromJson(Map<String, dynamic> json) => _$EbayGradedPriceFromJson(json);
+
+/// Median of PSA 10 / CGC 10 / BGS 10 recent sales.
+@override final  double? psa10;
+/// Median of PSA 9 recent sales.
+@override final  double? psa9;
+@override@JsonKey(name: 'last_updated')@TimestampConverter() final  DateTime? lastUpdated;
+
+/// Create a copy of EbayGradedPrice
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EbayGradedPriceCopyWith<_EbayGradedPrice> get copyWith => __$EbayGradedPriceCopyWithImpl<_EbayGradedPrice>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$EbayGradedPriceToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,psa10,psa9,lastUpdated);
+
+@override
+String toString() {
+  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, lastUpdated: $lastUpdated)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EbayGradedPriceCopyWith<$Res> implements $EbayGradedPriceCopyWith<$Res> {
+  factory _$EbayGradedPriceCopyWith(_EbayGradedPrice value, $Res Function(_EbayGradedPrice) _then) = __$EbayGradedPriceCopyWithImpl;
+@override @useResult
+$Res call({
+ double? psa10, double? psa9,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+});
+
+
+
+
+}
+/// @nodoc
+class __$EbayGradedPriceCopyWithImpl<$Res>
+    implements _$EbayGradedPriceCopyWith<$Res> {
+  __$EbayGradedPriceCopyWithImpl(this._self, this._then);
+
+  final _EbayGradedPrice _self;
+  final $Res Function(_EbayGradedPrice) _then;
+
+/// Create a copy of EbayGradedPrice
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? lastUpdated = freezed,}) {
+  return _then(_EbayGradedPrice(
+psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
+as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
+as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$EbayUsPricing {
 
+/// Split pricing: raw vs graded (set by ebay_price_fetcher.py).
+ EbayRawPrice? get raw; EbayGradedPrice? get graded;/// Legacy flat fields — kept for backward compatibility with older documents.
 @JsonKey(name: 'last_sold_nm') double? get lastSoldNm;@JsonKey(name: 'last_sold_lp') double? get lastSoldLp;@JsonKey(name: 'volume_7d') int? get volume7d;@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? get updatedAt;
 /// Create a copy of EbayUsPricing
 /// with the given fields replaced by the non-null parameter values.
@@ -28,16 +569,16 @@ $EbayUsPricingCopyWith<EbayUsPricing> get copyWith => _$EbayUsPricingCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayUsPricing&&(identical(other.lastSoldNm, lastSoldNm) || other.lastSoldNm == lastSoldNm)&&(identical(other.lastSoldLp, lastSoldLp) || other.lastSoldLp == lastSoldLp)&&(identical(other.volume7d, volume7d) || other.volume7d == volume7d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayUsPricing&&(identical(other.raw, raw) || other.raw == raw)&&(identical(other.graded, graded) || other.graded == graded)&&(identical(other.lastSoldNm, lastSoldNm) || other.lastSoldNm == lastSoldNm)&&(identical(other.lastSoldLp, lastSoldLp) || other.lastSoldLp == lastSoldLp)&&(identical(other.volume7d, volume7d) || other.volume7d == volume7d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lastSoldNm,lastSoldLp,volume7d,updatedAt);
+int get hashCode => Object.hash(runtimeType,raw,graded,lastSoldNm,lastSoldLp,volume7d,updatedAt);
 
 @override
 String toString() {
-  return 'EbayUsPricing(lastSoldNm: $lastSoldNm, lastSoldLp: $lastSoldLp, volume7d: $volume7d, updatedAt: $updatedAt)';
+  return 'EbayUsPricing(raw: $raw, graded: $graded, lastSoldNm: $lastSoldNm, lastSoldLp: $lastSoldLp, volume7d: $volume7d, updatedAt: $updatedAt)';
 }
 
 
@@ -48,11 +589,11 @@ abstract mixin class $EbayUsPricingCopyWith<$Res>  {
   factory $EbayUsPricingCopyWith(EbayUsPricing value, $Res Function(EbayUsPricing) _then) = _$EbayUsPricingCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'last_sold_nm') double? lastSoldNm,@JsonKey(name: 'last_sold_lp') double? lastSoldLp,@JsonKey(name: 'volume_7d') int? volume7d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+ EbayRawPrice? raw, EbayGradedPrice? graded,@JsonKey(name: 'last_sold_nm') double? lastSoldNm,@JsonKey(name: 'last_sold_lp') double? lastSoldLp,@JsonKey(name: 'volume_7d') int? volume7d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
 });
 
 
-
+$EbayRawPriceCopyWith<$Res>? get raw;$EbayGradedPriceCopyWith<$Res>? get graded;
 
 }
 /// @nodoc
@@ -65,16 +606,42 @@ class _$EbayUsPricingCopyWithImpl<$Res>
 
 /// Create a copy of EbayUsPricing
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? lastSoldNm = freezed,Object? lastSoldLp = freezed,Object? volume7d = freezed,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? raw = freezed,Object? graded = freezed,Object? lastSoldNm = freezed,Object? lastSoldLp = freezed,Object? volume7d = freezed,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
-lastSoldNm: freezed == lastSoldNm ? _self.lastSoldNm : lastSoldNm // ignore: cast_nullable_to_non_nullable
+raw: freezed == raw ? _self.raw : raw // ignore: cast_nullable_to_non_nullable
+as EbayRawPrice?,graded: freezed == graded ? _self.graded : graded // ignore: cast_nullable_to_non_nullable
+as EbayGradedPrice?,lastSoldNm: freezed == lastSoldNm ? _self.lastSoldNm : lastSoldNm // ignore: cast_nullable_to_non_nullable
 as double?,lastSoldLp: freezed == lastSoldLp ? _self.lastSoldLp : lastSoldLp // ignore: cast_nullable_to_non_nullable
 as double?,volume7d: freezed == volume7d ? _self.volume7d : volume7d // ignore: cast_nullable_to_non_nullable
 as int?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }
+/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EbayRawPriceCopyWith<$Res>? get raw {
+    if (_self.raw == null) {
+    return null;
+  }
 
+  return $EbayRawPriceCopyWith<$Res>(_self.raw!, (value) {
+    return _then(_self.copyWith(raw: value));
+  });
+}/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EbayGradedPriceCopyWith<$Res>? get graded {
+    if (_self.graded == null) {
+    return null;
+  }
+
+  return $EbayGradedPriceCopyWith<$Res>(_self.graded!, (value) {
+    return _then(_self.copyWith(graded: value));
+  });
+}
 }
 
 
@@ -156,10 +723,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EbayRawPrice? raw,  EbayGradedPrice? graded, @JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EbayUsPricing() when $default != null:
-return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
+return $default(_that.raw,_that.graded,_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -177,10 +744,10 @@ return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EbayRawPrice? raw,  EbayGradedPrice? graded, @JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _EbayUsPricing():
-return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
+return $default(_that.raw,_that.graded,_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +764,10 @@ return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EbayRawPrice? raw,  EbayGradedPrice? graded, @JsonKey(name: 'last_sold_nm')  double? lastSoldNm, @JsonKey(name: 'last_sold_lp')  double? lastSoldLp, @JsonKey(name: 'volume_7d')  int? volume7d, @JsonKey(name: 'updated_at')@TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _EbayUsPricing() when $default != null:
-return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
+return $default(_that.raw,_that.graded,_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt);case _:
   return null;
 
 }
@@ -212,9 +779,13 @@ return $default(_that.lastSoldNm,_that.lastSoldLp,_that.volume7d,_that.updatedAt
 @JsonSerializable()
 
 class _EbayUsPricing implements EbayUsPricing {
-  const _EbayUsPricing({@JsonKey(name: 'last_sold_nm') this.lastSoldNm, @JsonKey(name: 'last_sold_lp') this.lastSoldLp, @JsonKey(name: 'volume_7d') this.volume7d, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
+  const _EbayUsPricing({this.raw, this.graded, @JsonKey(name: 'last_sold_nm') this.lastSoldNm, @JsonKey(name: 'last_sold_lp') this.lastSoldLp, @JsonKey(name: 'volume_7d') this.volume7d, @JsonKey(name: 'updated_at')@TimestampConverter() this.updatedAt});
   factory _EbayUsPricing.fromJson(Map<String, dynamic> json) => _$EbayUsPricingFromJson(json);
 
+/// Split pricing: raw vs graded (set by ebay_price_fetcher.py).
+@override final  EbayRawPrice? raw;
+@override final  EbayGradedPrice? graded;
+/// Legacy flat fields — kept for backward compatibility with older documents.
 @override@JsonKey(name: 'last_sold_nm') final  double? lastSoldNm;
 @override@JsonKey(name: 'last_sold_lp') final  double? lastSoldLp;
 @override@JsonKey(name: 'volume_7d') final  int? volume7d;
@@ -233,16 +804,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayUsPricing&&(identical(other.lastSoldNm, lastSoldNm) || other.lastSoldNm == lastSoldNm)&&(identical(other.lastSoldLp, lastSoldLp) || other.lastSoldLp == lastSoldLp)&&(identical(other.volume7d, volume7d) || other.volume7d == volume7d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayUsPricing&&(identical(other.raw, raw) || other.raw == raw)&&(identical(other.graded, graded) || other.graded == graded)&&(identical(other.lastSoldNm, lastSoldNm) || other.lastSoldNm == lastSoldNm)&&(identical(other.lastSoldLp, lastSoldLp) || other.lastSoldLp == lastSoldLp)&&(identical(other.volume7d, volume7d) || other.volume7d == volume7d)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lastSoldNm,lastSoldLp,volume7d,updatedAt);
+int get hashCode => Object.hash(runtimeType,raw,graded,lastSoldNm,lastSoldLp,volume7d,updatedAt);
 
 @override
 String toString() {
-  return 'EbayUsPricing(lastSoldNm: $lastSoldNm, lastSoldLp: $lastSoldLp, volume7d: $volume7d, updatedAt: $updatedAt)';
+  return 'EbayUsPricing(raw: $raw, graded: $graded, lastSoldNm: $lastSoldNm, lastSoldLp: $lastSoldLp, volume7d: $volume7d, updatedAt: $updatedAt)';
 }
 
 
@@ -253,11 +824,11 @@ abstract mixin class _$EbayUsPricingCopyWith<$Res> implements $EbayUsPricingCopy
   factory _$EbayUsPricingCopyWith(_EbayUsPricing value, $Res Function(_EbayUsPricing) _then) = __$EbayUsPricingCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'last_sold_nm') double? lastSoldNm,@JsonKey(name: 'last_sold_lp') double? lastSoldLp,@JsonKey(name: 'volume_7d') int? volume7d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
+ EbayRawPrice? raw, EbayGradedPrice? graded,@JsonKey(name: 'last_sold_nm') double? lastSoldNm,@JsonKey(name: 'last_sold_lp') double? lastSoldLp,@JsonKey(name: 'volume_7d') int? volume7d,@JsonKey(name: 'updated_at')@TimestampConverter() DateTime? updatedAt
 });
 
 
-
+@override $EbayRawPriceCopyWith<$Res>? get raw;@override $EbayGradedPriceCopyWith<$Res>? get graded;
 
 }
 /// @nodoc
@@ -270,9 +841,11 @@ class __$EbayUsPricingCopyWithImpl<$Res>
 
 /// Create a copy of EbayUsPricing
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? lastSoldNm = freezed,Object? lastSoldLp = freezed,Object? volume7d = freezed,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? raw = freezed,Object? graded = freezed,Object? lastSoldNm = freezed,Object? lastSoldLp = freezed,Object? volume7d = freezed,Object? updatedAt = freezed,}) {
   return _then(_EbayUsPricing(
-lastSoldNm: freezed == lastSoldNm ? _self.lastSoldNm : lastSoldNm // ignore: cast_nullable_to_non_nullable
+raw: freezed == raw ? _self.raw : raw // ignore: cast_nullable_to_non_nullable
+as EbayRawPrice?,graded: freezed == graded ? _self.graded : graded // ignore: cast_nullable_to_non_nullable
+as EbayGradedPrice?,lastSoldNm: freezed == lastSoldNm ? _self.lastSoldNm : lastSoldNm // ignore: cast_nullable_to_non_nullable
 as double?,lastSoldLp: freezed == lastSoldLp ? _self.lastSoldLp : lastSoldLp // ignore: cast_nullable_to_non_nullable
 as double?,volume7d: freezed == volume7d ? _self.volume7d : volume7d // ignore: cast_nullable_to_non_nullable
 as int?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -280,7 +853,31 @@ as DateTime?,
   ));
 }
 
+/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EbayRawPriceCopyWith<$Res>? get raw {
+    if (_self.raw == null) {
+    return null;
+  }
 
+  return $EbayRawPriceCopyWith<$Res>(_self.raw!, (value) {
+    return _then(_self.copyWith(raw: value));
+  });
+}/// Create a copy of EbayUsPricing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EbayGradedPriceCopyWith<$Res>? get graded {
+    if (_self.graded == null) {
+    return null;
+  }
+
+  return $EbayGradedPriceCopyWith<$Res>(_self.graded!, (value) {
+    return _then(_self.copyWith(graded: value));
+  });
+}
 }
 
 

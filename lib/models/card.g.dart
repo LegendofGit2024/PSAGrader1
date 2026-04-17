@@ -6,8 +6,40 @@ part of 'card.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_EbayRawPrice _$EbayRawPriceFromJson(Map<String, dynamic> json) =>
+    _EbayRawPrice(
+      lastSold: (json['last_sold'] as num?)?.toDouble(),
+      lastUpdated: const TimestampConverter().fromJson(json['last_updated']),
+    );
+
+Map<String, dynamic> _$EbayRawPriceToJson(_EbayRawPrice instance) =>
+    <String, dynamic>{
+      'last_sold': instance.lastSold,
+      'last_updated': const TimestampConverter().toJson(instance.lastUpdated),
+    };
+
+_EbayGradedPrice _$EbayGradedPriceFromJson(Map<String, dynamic> json) =>
+    _EbayGradedPrice(
+      psa10: (json['psa10'] as num?)?.toDouble(),
+      psa9: (json['psa9'] as num?)?.toDouble(),
+      lastUpdated: const TimestampConverter().fromJson(json['last_updated']),
+    );
+
+Map<String, dynamic> _$EbayGradedPriceToJson(_EbayGradedPrice instance) =>
+    <String, dynamic>{
+      'psa10': instance.psa10,
+      'psa9': instance.psa9,
+      'last_updated': const TimestampConverter().toJson(instance.lastUpdated),
+    };
+
 _EbayUsPricing _$EbayUsPricingFromJson(Map<String, dynamic> json) =>
     _EbayUsPricing(
+      raw: json['raw'] == null
+          ? null
+          : EbayRawPrice.fromJson(json['raw'] as Map<String, dynamic>),
+      graded: json['graded'] == null
+          ? null
+          : EbayGradedPrice.fromJson(json['graded'] as Map<String, dynamic>),
       lastSoldNm: (json['last_sold_nm'] as num?)?.toDouble(),
       lastSoldLp: (json['last_sold_lp'] as num?)?.toDouble(),
       volume7d: (json['volume_7d'] as num?)?.toInt(),
@@ -16,6 +48,8 @@ _EbayUsPricing _$EbayUsPricingFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$EbayUsPricingToJson(_EbayUsPricing instance) =>
     <String, dynamic>{
+      'raw': instance.raw,
+      'graded': instance.graded,
       'last_sold_nm': instance.lastSoldNm,
       'last_sold_lp': instance.lastSoldLp,
       'volume_7d': instance.volume7d,

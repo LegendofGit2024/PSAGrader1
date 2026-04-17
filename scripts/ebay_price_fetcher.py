@@ -48,10 +48,12 @@ import argparse
 import base64
 import logging
 import os
+import re
 import statistics
 import sys
 import time
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 import requests
@@ -59,7 +61,59 @@ import requests
 log = logging.getLogger("ebay_fetcher")
 
 # ---------------------------------------------------------------------------
-# eBay Browse API  (replaces legacy Finding API)
+# Fetch mode
+# ---------------------------------------------------------------------------
+
+class FetchMode(str, Enum):
+    RAW    = "raw"     # ungraded card only
+    GRADED = "graded"  # slabbed/graded only
+    BOTH   = "both"    # run both queries (default for enrich_with_ebay_price)
+
+# ---------------------------------------------------------------------------
+# Regex: title classification (the "Keywords Trap" guard)
+#
+# Rule: a grade NUMBER is only meaningful when a grading COMPANY appears
+# immediately adjacent. "10 near mint potential" must NOT match PSA 10.
+# ---------------------------------------------------------------------------
+
+# Matches a grading company followed immediately by a number (PSA 10, CGC 9, etc.)
+_GRADED_REGEX = re.compile(
+    r'\b(PSA|CGC|BGS|ACE|SGC)\s*\d', re.IGNORECASE
+)
+# Specific grade buckets — company MUST appear next to the number
+_PSA10_REGEX  = re.compile(r'\bPSA\s*10\b',          re.IGNORECASE)
+_PSA9_REGEX   = re.compile(r'\bPSA\s*9\b(?!\s*\d)',  re.IGNORECASE)  # PSA 9 not PSA 9.5 etc
+_CGC10_REGEX  = re.compile(r'\bCGC\s*10\b',          re.IGNORECASE)
+_BGS10_REGEX  = re.compile(r'\bBGS\s*(?:10|9\.5)\b', re.IGNORECASE)
+_ACE10_REGEX  = re.compile(r'\bACE\s*10\b',          re.IGNORECASE)
+
+
+def is_valid_graded_title(title: str) -> bool:
+    """
+    Return True only if the title explicitly pairs a grading company with a
+    grade number. Rejects titles like "looks like a 10" or "Grade 10 potential."
+    """
+    return bool(_GRADED_REGEX.search(title))
+
+
+def classify_title(title: str) -> str:
+    """
+    Bucket a verified graded title into 'psa10', 'psa9', or 'graded_other'.
+    Treat CGC 10 / BGS 10 / ACE 10 as equivalent to PSA 10 for pricing.
+    """
+    if (
+        _PSA10_REGEX.search(title)
+        or _CGC10_REGEX.search(title)
+        or _BGS10_REGEX.search(title)
+        or _ACE10_REGEX.search(title)
+    ):
+        return "psa10"
+    if _PSA9_REGEX.search(title):
+        return "psa9"
+    return "graded_other"
+
+# ---------------------------------------------------------------------------
+# eBay Browse API
 # ---------------------------------------------------------------------------
 
 _BROWSE_API_URL  = "https://api.ebay.com/buy/browse/v1/item_summary/search"
@@ -136,36 +190,35 @@ _RARITY_KEYWORDS: dict[str, str] = {
 # ---------------------------------------------------------------------------
 
 def build_query(
-    card_name: str,
-    set_name:  str,
-    number:    str,
-    rarity:    str = "",
+    card_name:      str,
+    set_name:       str,
+    number:         str,
+    rarity:         str = "",
     specialty_tags: list[str] | None = None,
+    mode:           FetchMode = FetchMode.RAW,
 ) -> str:
     """
-    Construct the eBay keyword string.
+    Construct the eBay keyword string for the given FetchMode.
 
-    Format:
-        {set_name} {card_name} {number} ({variant_hint}) -lot -digital -code
+    RAW mode    →  adds (raw, ungraded, nm, near mint)  and  -psa -cgc -bgs -graded -slab
+    GRADED mode →  adds (psa, cgc, bgs, graded, slab)   and  -raw -ungraded
 
     Examples:
-        "Base Set Charizard 4/102 holo -lot -digital -code"
-        "Fossil Gengar 1st edition holo -lot -digital -code"
+        RAW    → "Base Set Charizard 4 (holo, raw, ungraded, nm) -psa -cgc -bgs -graded -slab -lot -digital -code"
+        GRADED → "Base Set Charizard 4 (holo, psa, cgc, bgs, graded) -raw -ungraded -lot -digital -code"
     """
     parts: list[str] = []
 
-    # Set + card name + number
     if set_name:
         parts.append(set_name.strip())
     parts.append(card_name.strip())
     if number:
         parts.append(number.strip())
 
-    # Variant hint from rarity string
+    # Variant hint from rarity
     rarity_lower = rarity.lower()
     variant_hint = next(
-        (kw for key, kw in _RARITY_KEYWORDS.items() if key in rarity_lower),
-        "",
+        (kw for key, kw in _RARITY_KEYWORDS.items() if key in rarity_lower), ""
     )
 
     # Specialty tag hints
@@ -180,12 +233,25 @@ def build_query(
         if "error" in specialty_tags:
             tag_hints.append("error")
 
-    # Combine variant and tag hints into a parenthetical OR group
-    hints = list(dict.fromkeys(filter(None, [variant_hint] + tag_hints)))
-    if hints:
-        parts.append(f"({', '.join(hints)})")
+    # Mode-specific inclusion keywords
+    if mode == FetchMode.RAW:
+        mode_hints = ["raw", "ungraded", "nm", "near mint"]
+    elif mode == FetchMode.GRADED:
+        mode_hints = ["psa", "cgc", "bgs", "graded", "slab"]
+    else:
+        mode_hints = []
 
-    # Hard exclusions — eliminates lots, digital/code cards
+    all_hints = list(dict.fromkeys(filter(None, [variant_hint] + tag_hints + mode_hints)))
+    if all_hints:
+        parts.append(f"({', '.join(all_hints)})")
+
+    # Mode-specific exclusions (prevent cross-contamination)
+    if mode == FetchMode.RAW:
+        parts.append("-psa -cgc -bgs -graded -slab -cert")
+    elif mode == FetchMode.GRADED:
+        parts.append("-raw -ungraded")
+
+    # Universal exclusions
     parts.append("-lot -digital -code -bundle -collection")
 
     return " ".join(parts)
@@ -285,9 +351,54 @@ def extract_prices(items: list[dict]) -> list[float]:
     return prices
 
 
+def extract_graded_prices(items: list[dict]) -> dict[str, list[float]]:
+    """
+    Extract prices from graded listings, bucketed by grade.
+
+    Uses regex to validate that the grading company name appears adjacent to
+    the grade number — prevents "10 near mint potential" from polluting PSA 10
+    data.
+
+    Returns:
+        {'psa10': [...], 'psa9': [...], 'other': [...]}
+        All lists are newest-first, shipping already stripped.
+    """
+    buckets: dict[str, list[float]] = {"psa10": [], "psa9": [], "other": []}
+
+    for item in items:
+        title = item.get("title", "")
+
+        # Hard gate: must have company + grade number together
+        if not is_valid_graded_title(title):
+            log.debug("Rejected (no valid grade company+number): %s", title[:60])
+            continue
+
+        try:
+            item_price = float(item["price"]["value"])
+        except (KeyError, TypeError, ValueError):
+            continue
+
+        shipping = 0.0
+        try:
+            opts = item.get("shippingOptions", [])
+            if opts:
+                shipping = float(opts[0].get("shippingCost", {}).get("value", 0))
+        except (TypeError, ValueError):
+            pass
+
+        net = item_price - shipping
+        if net < 0:
+            continue
+
+        bucket = classify_title(title)
+        buckets[bucket if bucket != "graded_other" else "other"].append(net)
+
+    return buckets
+
+
 def median_of_last_n(prices: list[float], n: int = _MEDIAN_SAMPLE) -> float | None:
     """Return the median of the last (most recent) n prices."""
-    sample = prices[:n]   # API returns newest first (EndTimeSoonest)
+    sample = prices[:n]   # API returns newest first (newlyListed sort)
     if not sample:
         return None
     return statistics.median(sample)
@@ -297,8 +408,10 @@ def median_of_last_n(prices: list[float], n: int = _MEDIAN_SAMPLE) -> float | No
 # Firestore helpers
 # ---------------------------------------------------------------------------
 
-def update_firestore(db, card_id: str, median_price: float, collection: str = "cards") -> None:
-    """Write pricing.ebay_us.last_sold_nm + updated_at to Firestore."""
+def update_firestore_raw(
+    db, card_id: str, median_price: float, collection: str = "cards"
+) -> None:
+    """Write pricing.ebay_us.raw.last_sold + last_updated to Firestore."""
     from google.cloud.firestore_v1 import SERVER_TIMESTAMP  # type: ignore
 
     ref = db.collection(collection).document(card_id)
@@ -306,24 +419,65 @@ def update_firestore(db, card_id: str, median_price: float, collection: str = "c
         {
             "pricing": {
                 "ebay_us": {
-                    "last_sold_nm": round(median_price, 2),
-                    "updated_at":   SERVER_TIMESTAMP,
+                    "raw": {
+                        "last_sold":    round(median_price, 2),
+                        "last_updated": SERVER_TIMESTAMP,
+                    }
                 }
             }
         },
         merge=True,
     )
-    log.info("  [%s] eBay median = $%.2f → Firestore updated", card_id, median_price)
+    log.info("  [%s] RAW median = $%.2f → Firestore updated", card_id, median_price)
 
 
-def flag_high_scarcity(db, card_id: str, collection: str = "cards") -> None:
+def update_firestore_graded(
+    db,
+    card_id:    str,
+    psa10:      float | None,
+    psa9:       float | None,
+    collection: str = "cards",
+) -> None:
     """
-    eBay returned 0 sold results — card is too rare to price automatically.
-    - Adds 'high_scarcity' to meta.specialty_tags
-    - Sets pricing.ebay_us.last_sold_nm = None
-    - Sets a human-readable scarcity_note field
+    Write pricing.ebay_us.graded.{psa10, psa9, last_updated} to Firestore.
+    Only writes fields that have a value — preserves existing fields.
+    """
+    from google.cloud.firestore_v1 import SERVER_TIMESTAMP  # type: ignore
+
+    graded: dict = {"last_updated": SERVER_TIMESTAMP}
+    if psa10 is not None:
+        graded["psa10"] = round(psa10, 2)
+    if psa9 is not None:
+        graded["psa9"] = round(psa9, 2)
+
+    ref = db.collection(collection).document(card_id)
+    ref.set({"pricing": {"ebay_us": {"graded": graded}}}, merge=True)
+
+    parts = []
+    if psa10 is not None:
+        parts.append(f"PSA10=${psa10:.2f}")
+    if psa9 is not None:
+        parts.append(f"PSA9=${psa9:.2f}")
+    log.info("  [%s] GRADED %s → Firestore updated", card_id, ", ".join(parts) or "no data")
+
+
+def flag_high_scarcity(
+    db,
+    card_id:    str,
+    mode:       FetchMode = FetchMode.BOTH,
+    collection: str = "cards",
+) -> None:
+    """
+    eBay returned 0 sold results.
+    Adds 'high_scarcity' tag and writes null prices with a scarcity note.
     """
     from google.cloud.firestore_v1 import ArrayUnion, SERVER_TIMESTAMP  # type: ignore
+
+    ebay_update: dict = {}
+    if mode in (FetchMode.RAW, FetchMode.BOTH):
+        ebay_update["raw"] = {"last_sold": None, "last_updated": SERVER_TIMESTAMP}
+    if mode in (FetchMode.GRADED, FetchMode.BOTH):
+        ebay_update["graded"] = {"psa10": None, "psa9": None, "last_updated": SERVER_TIMESTAMP}
 
     ref = db.collection(collection).document(card_id)
     ref.set(
@@ -332,70 +486,94 @@ def flag_high_scarcity(db, card_id: str, collection: str = "cards") -> None:
                 "specialty_tags": ArrayUnion(["high_scarcity"]),
                 "scarcity_note":  "High Scarcity: Manual Verification Required",
             },
-            "pricing": {
-                "ebay_us": {
-                    "last_sold_nm": None,
-                    "updated_at":   SERVER_TIMESTAMP,
-                }
-            },
+            "pricing": {"ebay_us": ebay_update},
         },
         merge=True,
     )
-    log.warning(
-        "  [%s] 0 eBay results → flagged 'High Scarcity: Manual Verification Required'",
-        card_id,
-    )
+    log.warning("  [%s] 0 results (%s) → High Scarcity flagged", card_id, mode.value)
 
 
 # ---------------------------------------------------------------------------
 # Top-level enrichment function (called by kaggle_import.py)
 # ---------------------------------------------------------------------------
 
-def enrich_with_ebay_price(doc: dict, client_id: str, client_secret: str) -> dict:
+def enrich_with_ebay_price(
+    doc:           dict,
+    client_id:     str,
+    client_secret: str,
+    mode:          FetchMode = FetchMode.BOTH,
+) -> dict:
     """
     Fetch eBay sold prices for a card and inject the result into the doc dict
-    in-place (before it is written to Firestore).
+    before it is written to Firestore by kaggle_import.py.
 
-    Does NOT write to Firestore directly — kaggle_import.py handles that via
-    batch.set() so this function just enriches the dict.
+    Runs RAW and/or GRADED queries depending on mode and writes results to:
+        pricing.ebay_us.raw.last_sold
+        pricing.ebay_us.graded.psa10
+        pricing.ebay_us.graded.psa9
     """
     meta   = doc.get("meta", {})
     name   = meta.get("name", "")
-    set_id = meta.get("set_id", "")      # e.g. "base1"
+    set_id = meta.get("set_id", "")
     number = meta.get("set_number", "")
     rarity = meta.get("variant", "")
     tags   = meta.get("specialty_tags", [])
+    now    = datetime.now(timezone.utc).isoformat()
 
-    query  = build_query(name, set_id, number, rarity, tags)
-    log.debug("eBay query: %s", query)
+    doc.setdefault("pricing", {}).setdefault("ebay_us", {})
+    ebay = doc["pricing"]["ebay_us"]
 
-    try:
-        items  = fetch_sold_listings(query, client_id, client_secret)
+    def _fetch(m: FetchMode) -> list[dict]:
+        q = build_query(name, set_id, number, rarity, tags, mode=m)
+        log.debug("eBay [%s] query: %s", m.value, q)
+        try:
+            return fetch_sold_listings(q, client_id, client_secret)
+        except Exception as exc:
+            log.debug("eBay API error [%s] for '%s': %s", m.value, name, exc)
+            return []
+
+    # ── RAW ───────────────────────────────────────────────────────────────
+    if mode in (FetchMode.RAW, FetchMode.BOTH):
+        items  = _fetch(FetchMode.RAW)
         prices = extract_prices(items)
         median = median_of_last_n(prices)
-    except Exception as exc:
-        log.debug("eBay API error for '%s': %s", name, exc)
-        median = None
+        if median is not None:
+            ebay["raw"] = {"last_sold": round(median, 2), "last_updated": now}
+            log.info("  %-38s  RAW=$%.2f", name[:38], median)
+        else:
+            ebay["raw"] = {"last_sold": None, "last_updated": now}
+            log.warning("  %-38s  RAW=0 results", name[:38])
 
-    now_iso = datetime.now(timezone.utc).isoformat()
+    # ── GRADED ────────────────────────────────────────────────────────────
+    if mode in (FetchMode.GRADED, FetchMode.BOTH):
+        items   = _fetch(FetchMode.GRADED)
+        buckets = extract_graded_prices(items)
+        psa10   = median_of_last_n(buckets["psa10"])
+        psa9    = median_of_last_n(buckets["psa9"])
+        graded: dict = {"last_updated": now}
+        if psa10 is not None:
+            graded["psa10"] = round(psa10, 2)
+        if psa9 is not None:
+            graded["psa9"]  = round(psa9, 2)
+        ebay["graded"] = graded
+        log.info(
+            "  %-38s  PSA10=%s  PSA9=%s",
+            name[:38],
+            f"${psa10:.2f}" if psa10 else "—",
+            f"${psa9:.2f}"  if psa9  else "—",
+        )
 
-    if median is not None:
-        doc.setdefault("pricing", {})["ebay_us"] = {
-            "last_sold_nm": round(median, 2),
-            "updated_at":   now_iso,
-        }
-        log.info("  %-40s  eBay median = $%.2f", name[:40], median)
-    else:
-        # Flag scarcity — kaggle_import will write this to Firestore via merge
-        doc.setdefault("meta", {}).setdefault("specialty_tags", [])
+    # ── Scarcity flag ─────────────────────────────────────────────────────
+    raw_sold    = ebay.get("raw",    {}).get("last_sold")
+    graded_data = ebay.get("graded", {})
+    has_any_price = raw_sold is not None or graded_data.get("psa10") or graded_data.get("psa9")
+
+    if not has_any_price:
+        doc["meta"].setdefault("specialty_tags", [])
         if "high_scarcity" not in doc["meta"]["specialty_tags"]:
             doc["meta"]["specialty_tags"].append("high_scarcity")
         doc["meta"]["scarcity_note"] = "High Scarcity: Manual Verification Required"
-        doc.setdefault("pricing", {})["ebay_us"] = {
-            "last_sold_nm": None,
-            "updated_at":   now_iso,
-        }
-        log.warning("  %-40s  0 eBay results → high_scarcity", name[:40])
+        log.warning("  %-38s  No prices found → high_scarcity", name[:38])
 
     return doc
 
@@ -491,6 +669,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="eBay Client Secret / Cert ID (or set EBAY_CLIENT_SECRET env var)",
     )
     p.add_argument(
+        "--mode",
+        choices=["raw", "graded", "both"],
+        default="both",
+        help="Which prices to fetch: raw, graded, or both (default: both)",
+    )
+    p.add_argument(
         "--delay", type=float, default=0.5,
         help="Seconds between eBay API calls when using --all (default: 0.5)",
     )
@@ -513,6 +697,7 @@ def _process_single(
     client_secret: str,
     collection:    str,
     dry_run:       bool,
+    mode:          FetchMode = FetchMode.BOTH,
     name_override: str = "",
     set_override:  str = "",
     num_override:  str = "",
@@ -532,38 +717,71 @@ def _process_single(
             if snapshot.exists:
                 data   = snapshot.to_dict() or {}
                 meta   = data.get("meta", {})
-                name   = name_override  or meta.get("name",       "")
-                set_id = set_override   or meta.get("set_id",     "")
-                number = num_override   or meta.get("set_number", "")
-                rarity = rar_override   or meta.get("variant",    "")
+                name   = name_override or meta.get("name",       "")
+                set_id = set_override  or meta.get("set_id",     "")
+                number = num_override  or meta.get("set_number", "")
+                rarity = rar_override  or meta.get("variant",    "")
                 tags   = meta.get("specialty_tags", [])
             else:
                 log.warning("Card not in Firestore — falling back to card ID parsing")
 
-        # Last resort: parse the card ID itself (e.g. "base1-4" → set=base1, num=4)
         if not set_id or not number:
             parsed_set, parsed_num = _parse_card_id(card_id)
             set_id = set_id or _SET_ID_TO_NAME.get(parsed_set, parsed_set)
             number = number or parsed_num
 
-    query = build_query(name, set_id, number, rarity, tags)
-    print(f"\nCard   : {name or card_id}  [{card_id}]")
-    print(f"Query  : {query}")
+    print(f"\nCard   : {name or card_id}  [{card_id}]  mode={mode.value}")
 
-    items  = fetch_sold_listings(query, client_id, client_secret)
-    prices = extract_prices(items)
-    median = median_of_last_n(prices)
+    def _run_mode(m: FetchMode) -> None:
+        q      = build_query(name, set_id, number, rarity, tags, mode=m)
+        print(f"Query [{m.value:6}]: {q}")
+        items  = fetch_sold_listings(q, client_id, client_secret)
 
-    print(f"Sales  : {len(items)} found,  prices extracted: {[f'${p:.2f}' for p in prices]}")
+        if m == FetchMode.RAW:
+            prices = extract_prices(items)
+            median = median_of_last_n(prices)
+            print(f"  Prices : {[f'${p:.2f}' for p in prices[:5]]}")
+            if median is not None:
+                print(f"  Median : ${median:.2f}")
+                if not dry_run:
+                    update_firestore_raw(db, card_id, median, collection)
+            else:
+                print("  Median : N/A — 0 results")
+                if not dry_run:
+                    flag_high_scarcity(db, card_id, FetchMode.RAW, collection)
 
-    if median is not None:
-        print(f"Median : ${median:.2f}  (of last {min(len(prices), _MEDIAN_SAMPLE)})")
-        if not dry_run:
-            update_firestore(db, card_id, median, collection)
+        elif m == FetchMode.GRADED:
+            buckets = extract_graded_prices(items)
+            psa10   = median_of_last_n(buckets["psa10"])
+            psa9    = median_of_last_n(buckets["psa9"])
+            print(f"  PSA 10 : {[f'${p:.2f}' for p in buckets['psa10'][:5]]}")
+            print(f"  PSA 9  : {[f'${p:.2f}' for p in buckets['psa9'][:5]]}")
+            print(f"  PSA10 median : {'$'+f'{psa10:.2f}' if psa10 else 'N/A'}")
+            print(f"  PSA9  median : {'$'+f'{psa9:.2f}'  if psa9  else 'N/A'}")
+            if psa10 or psa9:
+                if not dry_run:
+                    update_firestore_graded(db, card_id, psa10, psa9, collection)
+            else:
+                print("  No graded results")
+                if not dry_run:
+                    flag_high_scarcity(db, card_id, FetchMode.GRADED, collection)
+
+            # Grading Alpha insight
+            if psa10 and name:
+                raw_field = (
+                    (db.collection(collection).document(card_id).get().to_dict() or {})
+                    .get("pricing", {}).get("ebay_us", {}).get("raw", {}).get("last_sold")
+                    if db else None
+                )
+                if raw_field:
+                    alpha = psa10 - raw_field
+                    print(f"  ★ Grading Alpha: PSA10 ${psa10:.2f} - Raw ${raw_field:.2f} = ${alpha:.2f}")
+
+    if mode == FetchMode.BOTH:
+        _run_mode(FetchMode.RAW)
+        _run_mode(FetchMode.GRADED)
     else:
-        print("Median : N/A — 0 sold results → would flag as High Scarcity")
-        if not dry_run:
-            flag_high_scarcity(db, card_id, collection)
+        _run_mode(mode)
 
     if dry_run:
         print("(dry run — Firestore not updated)")
@@ -631,12 +849,14 @@ def main() -> None:
                 firebase_admin.initialize_app(cred)
             db = fb_firestore.client()
 
-    cid    = args.ebay_client_id
+    cid     = args.ebay_client_id
     csecret = args.ebay_client_secret
+    mode    = FetchMode(args.mode)
 
     if args.card_id:
         _process_single(
             db, args.card_id, cid, csecret, args.collection, args.dry_run,
+            mode=mode,
             name_override=args.name,
             set_override=args.set,
             num_override=args.number,
@@ -654,11 +874,10 @@ def main() -> None:
             card_id = snap.id
             log.info("[%d/%d] %s", i, len(docs), card_id)
             try:
-                _process_single(db, card_id, cid, csecret, args.collection, args.dry_run)
+                _process_single(db, card_id, cid, csecret, args.collection, args.dry_run, mode=mode)
             except Exception as exc:
                 log.error("  Failed: %s", exc)
 
-            # Browse API rate limit is generous but add a small delay
             time.sleep(args.delay)
 
     log.info("Done.")

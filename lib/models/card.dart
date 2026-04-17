@@ -14,9 +14,40 @@ enum CardLanguage { en, jp, kr, zh }
 // Regional pricing sub-models
 // ---------------------------------------------------------------------------
 
+/// Raw (ungraded) eBay sold price — written by ebay_price_fetcher.py
+@freezed
+abstract class EbayRawPrice with _$EbayRawPrice {
+  const factory EbayRawPrice({
+    @JsonKey(name: 'last_sold') double? lastSold,
+    @JsonKey(name: 'last_updated') @TimestampConverter() DateTime? lastUpdated,
+  }) = _EbayRawPrice;
+
+  factory EbayRawPrice.fromJson(Map<String, dynamic> json) =>
+      _$EbayRawPriceFromJson(json);
+}
+
+/// Graded (slabbed) eBay sold prices — written by ebay_price_fetcher.py
+@freezed
+abstract class EbayGradedPrice with _$EbayGradedPrice {
+  const factory EbayGradedPrice({
+    /// Median of PSA 10 / CGC 10 / BGS 10 recent sales.
+    double? psa10,
+    /// Median of PSA 9 recent sales.
+    double? psa9,
+    @JsonKey(name: 'last_updated') @TimestampConverter() DateTime? lastUpdated,
+  }) = _EbayGradedPrice;
+
+  factory EbayGradedPrice.fromJson(Map<String, dynamic> json) =>
+      _$EbayGradedPriceFromJson(json);
+}
+
 @freezed
 abstract class EbayUsPricing with _$EbayUsPricing {
   const factory EbayUsPricing({
+    /// Split pricing: raw vs graded (set by ebay_price_fetcher.py).
+    EbayRawPrice? raw,
+    EbayGradedPrice? graded,
+    /// Legacy flat fields — kept for backward compatibility with older documents.
     @JsonKey(name: 'last_sold_nm') double? lastSoldNm,
     @JsonKey(name: 'last_sold_lp') double? lastSoldLp,
     @JsonKey(name: 'volume_7d') int? volume7d,
