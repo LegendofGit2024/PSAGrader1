@@ -233,6 +233,33 @@ service cloud.firestore {
     }
 
     // -----------------------------------------------------------------------
+    // /search_requests/{requestId}
+    //
+    // Flutter writes here to trigger the onSearchRequest Cloud Function.
+    // requestId format: "{userId}_{cardId}"
+    //
+    // Rules:
+    //   create — authenticated user may only create their own requests,
+    //             must include required fields, and may not forge user_id.
+    //   read   — owner may stream their own request to watch for deletion
+    //             (deletion = Cloud Function finished, spinner can stop).
+    //   update/delete — Cloud Function uses Admin SDK (bypasses rules).
+    // -----------------------------------------------------------------------
+    match /search_requests/{requestId} {
+      allow create: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.keys().hasAll([
+             "card_id", "name", "set_id", "number", "user_id", "created_at"
+           ]);
+
+      allow read: if isAuthenticated()
+        && resource.data.user_id == request.auth.uid;
+
+      // Prevent clients from deleting requests (CF only)
+      allow update, delete: if false;
+    }
+
+    // -----------------------------------------------------------------------
     // Catch-all: deny everything else
     // -----------------------------------------------------------------------
     match /{document=**} {

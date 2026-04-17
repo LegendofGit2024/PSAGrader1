@@ -7,12 +7,17 @@ admin.initializeApp();
 const db = admin.firestore();
 
 // ---------------------------------------------------------------------------
-// Secrets — set via:  firebase functions:secrets:set EBAY_TOKEN
+// Secrets — set via:  firebase functions:secrets:set <SECRET_NAME>
 // ---------------------------------------------------------------------------
-const EBAY_TOKEN   = functions.params.defineSecret("EBAY_TOKEN");
-const TCG_TOKEN    = functions.params.defineSecret("TCG_TOKEN");
+const EBAY_TOKEN    = functions.params.defineSecret("EBAY_TOKEN");
+const TCG_TOKEN     = functions.params.defineSecret("TCG_TOKEN");
 const CMK_APP_TOKEN = functions.params.defineSecret("CMK_APP_TOKEN");
-const PSA_API_KEY  = functions.params.defineSecret("PSA_API_KEY");
+const PSA_API_KEY   = functions.params.defineSecret("PSA_API_KEY");
+
+// ---------------------------------------------------------------------------
+// On-demand eBay search  (search_requests/{requestId} trigger)
+// ---------------------------------------------------------------------------
+export { onSearchRequest } from "./ebay_search";
 
 // ---------------------------------------------------------------------------
 // Types
