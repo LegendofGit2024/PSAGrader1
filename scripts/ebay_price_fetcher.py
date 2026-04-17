@@ -289,7 +289,7 @@ def build_query(
         if all_hints:
             parts.append(f"({', '.join(all_hints)})")
         parts.append("-psa -cgc -bgs -graded -slab -cert")
-        parts.append("-lot -bundle -digital -code -keychain -keychains -"key chain"")
+        parts.append("-lot -bundle -digital -code -keychain")
 
     # GRADED queries are handled by build_graded_query() below — this branch
     # is only reached for RAW or BOTH (BOTH delegates to raw + graded separately).
@@ -346,7 +346,7 @@ def build_graded_query(
     else:
         parts.append("graded")
 
-    parts.append("-lot -bundle -digital -code -keychain -keychains -"key chain"")
+    parts.append("-lot -bundle -digital -code -keychain")
     return " ".join(parts)
 
 
