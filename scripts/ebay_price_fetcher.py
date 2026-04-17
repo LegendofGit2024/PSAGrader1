@@ -342,6 +342,59 @@ def enrich_with_ebay_price(doc: dict, app_id: str) -> dict:
 # Standalone CLI
 # ---------------------------------------------------------------------------
 
+def _parse_card_id(card_id: str) -> tuple[str, str]:
+    """
+    Derive a best-guess set_id and number from a pokemontcg.io card ID.
+    e.g. "base1-4"  → ("base1", "4")
+         "swsh1-25" → ("swsh1", "25")
+    Returns ("", "") if the format is unrecognised.
+    """
+    parts = card_id.rsplit("-", 1)
+    if len(parts) == 2:
+        return parts[0], parts[1]
+    return "", ""
+
+
+# Human-readable set names for the most common set IDs so the eBay query
+# is descriptive rather than a raw code like "base1".
+_SET_ID_TO_NAME: dict[str, str] = {
+    "base1":    "Base Set",
+    "base2":    "Jungle",
+    "base3":    "Fossil",
+    "base4":    "Base Set 2",
+    "base5":    "Team Rocket",
+    "base6":    "Legendary Collection",
+    "gym1":     "Gym Heroes",
+    "gym2":     "Gym Challenge",
+    "neo1":     "Neo Genesis",
+    "neo2":     "Neo Discovery",
+    "neo3":     "Neo Revelation",
+    "neo4":     "Neo Destiny",
+    "ecard1":   "Expedition Base Set",
+    "ecard2":   "Aquapolis",
+    "ecard3":   "Skyridge",
+    "swsh1":    "Sword & Shield",
+    "swsh2":    "Rebel Clash",
+    "swsh3":    "Darkness Ablaze",
+    "swsh4":    "Vivid Voltage",
+    "swsh5":    "Battle Styles",
+    "swsh6":    "Chilling Reign",
+    "swsh7":    "Evolving Skies",
+    "swsh8":    "Fusion Strike",
+    "swsh9":    "Brilliant Stars",
+    "swsh10":   "Astral Radiance",
+    "swsh11":   "Lost Origin",
+    "swsh12":   "Silver Tempest",
+    "sv1":      "Scarlet & Violet",
+    "sv2":      "Paldea Evolved",
+    "sv3":      "Obsidian Flames",
+    "sv4":      "Paradox Rift",
+    "sv5":      "Temporal Forces",
+    "sv6":      "Twilight Masquerade",
+    "sv7":      "Stellar Crown",
+}
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Fetch eBay sold prices and update Firestore.",
@@ -378,33 +431,55 @@ def _build_parser() -> argparse.ArgumentParser:
         "--dry-run", action="store_true",
         help="Print query and result — do not write to Firestore",
     )
+    # Manual overrides — lets you test without Firestore data
+    p.add_argument("--name",   default="", help="Card name override, e.g. Charizard")
+    p.add_argument("--set",    default="", help="Set name override, e.g. 'Base Set'")
+    p.add_argument("--number", default="", help="Card number override, e.g. 4")
+    p.add_argument("--rarity", default="", help="Rarity override, e.g. 'Rare Holo'")
     return p
 
 
 def _process_single(
     db,
-    card_id:    str,
-    app_id:     str,
-    collection: str,
-    dry_run:    bool,
+    card_id:       str,
+    app_id:        str,
+    collection:    str,
+    dry_run:       bool,
+    name_override: str = "",
+    set_override:  str = "",
+    num_override:  str = "",
+    rar_override:  str = "",
 ) -> None:
-    # Fetch card meta from Firestore
-    doc_ref  = db.collection(collection).document(card_id)
-    snapshot = doc_ref.get()
-    if not snapshot.exists:
-        log.error("Card not found in Firestore: %s", card_id)
-        return
+    # ── Pull meta from Firestore (skip if manual overrides supplied) ───────
+    name   = name_override
+    set_id = set_override
+    number = num_override
+    rarity = rar_override
+    tags: list[str] = []
 
-    data   = snapshot.to_dict() or {}
-    meta   = data.get("meta", {})
-    name   = meta.get("name", "")
-    set_id = meta.get("set_id", "")
-    number = meta.get("set_number", "")
-    rarity = meta.get("variant", "")
-    tags   = meta.get("specialty_tags", [])
+    if not (name_override and set_override):
+        if db is not None:
+            doc_ref  = db.collection(collection).document(card_id)
+            snapshot = doc_ref.get()
+            if snapshot.exists:
+                data   = snapshot.to_dict() or {}
+                meta   = data.get("meta", {})
+                name   = name_override  or meta.get("name",       "")
+                set_id = set_override   or meta.get("set_id",     "")
+                number = num_override   or meta.get("set_number", "")
+                rarity = rar_override   or meta.get("variant",    "")
+                tags   = meta.get("specialty_tags", [])
+            else:
+                log.warning("Card not in Firestore — falling back to card ID parsing")
 
-    query  = build_query(name, set_id, number, rarity, tags)
-    print(f"\nCard   : {name}  [{card_id}]")
+        # Last resort: parse the card ID itself (e.g. "base1-4" → set=base1, num=4)
+        if not set_id or not number:
+            parsed_set, parsed_num = _parse_card_id(card_id)
+            set_id = set_id or _SET_ID_TO_NAME.get(parsed_set, parsed_set)
+            number = number or parsed_num
+
+    query = build_query(name, set_id, number, rarity, tags)
+    print(f"\nCard   : {name or card_id}  [{card_id}]")
     print(f"Query  : {query}")
 
     items  = fetch_sold_listings(query, app_id)
@@ -418,7 +493,7 @@ def _process_single(
         if not dry_run:
             update_firestore(db, card_id, median, collection)
     else:
-        print("Median : N/A — 0 sold results")
+        print("Median : N/A — 0 sold results → would flag as High Scarcity")
         if not dry_run:
             flag_high_scarcity(db, card_id, collection)
 
@@ -438,32 +513,60 @@ def main() -> None:
 
     if not args.ebay_app_id:
         log.error(
-            "No eBay App ID provided.  Set EBAY_APP_ID env var or use --ebay-app-id."
+            "No eBay App ID provided.\n"
+            "  Option 1 (this session):  $env:EBAY_APP_ID = 'NathanRo-s-PRD-f84c0e5fe-7b2339df'\n"
+            "  Option 2 (permanent):     [System.Environment]::SetEnvironmentVariable('EBAY_APP_ID','NathanRo-s-PRD-f84c0e5fe-7b2339df','User')\n"
+            "  Option 3 (inline):        --ebay-app-id NathanRo-s-PRD-f84c0e5fe-7b2339df"
         )
         sys.exit(1)
 
-    # Firebase init
-    try:
-        import firebase_admin
-        from firebase_admin import credentials, firestore as fb_firestore
-    except ImportError:
-        log.error("firebase-admin not installed.  Run: pip install firebase-admin")
-        sys.exit(1)
+    # ── Firebase init (skipped for dry-run with manual --name/--set) ───────
+    has_manual_meta = bool(args.name and args.set)
+    db = None
 
-    sa_path = __import__("pathlib").Path(args.service_account)
-    if not sa_path.exists() and not args.dry_run:
-        log.error("Service-account file not found: %s", sa_path)
-        sys.exit(1)
+    if not (args.dry_run and has_manual_meta):
+        try:
+            import firebase_admin
+            from firebase_admin import credentials, firestore as fb_firestore
+        except ImportError:
+            log.error("firebase-admin not installed.  Run: pip install firebase-admin")
+            sys.exit(1)
 
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(str(sa_path))
-        firebase_admin.initialize_app(cred)
-
-    db = fb_firestore.client()
+        from pathlib import Path as _Path
+        sa_path = _Path(args.service_account)
+        if not sa_path.exists():
+            if args.dry_run:
+                log.warning(
+                    "service-account.json not found — running in query-only mode "
+                    "(no Firestore lookup, using --name/--set/--number overrides or card ID parsing)"
+                )
+            else:
+                log.error(
+                    "Service-account file not found: %s\n"
+                    "Download from Firebase Console → Project Settings → Service Accounts",
+                    sa_path,
+                )
+                sys.exit(1)
+        else:
+            import firebase_admin  # noqa: F811
+            from firebase_admin import credentials, firestore as fb_firestore  # noqa: F811
+            if not firebase_admin._apps:
+                cred = credentials.Certificate(str(sa_path))
+                firebase_admin.initialize_app(cred)
+            db = fb_firestore.client()
 
     if args.card_id:
-        _process_single(db, args.card_id, args.ebay_app_id, args.collection, args.dry_run)
+        _process_single(
+            db, args.card_id, args.ebay_app_id, args.collection, args.dry_run,
+            name_override=args.name,
+            set_override=args.set,
+            num_override=args.number,
+            rar_override=args.rarity,
+        )
     else:
+        if db is None:
+            log.error("--all requires a valid service-account.json")
+            sys.exit(1)
         # --all: stream every doc in the collection
         log.info("Streaming all documents from '%s' …", args.collection)
         docs = list(db.collection(args.collection).stream())
@@ -479,7 +582,7 @@ def main() -> None:
             except Exception as exc:
                 log.error("  Failed: %s", exc)
 
-            # Respect eBay rate limit (~5 000 calls/day = ~1 per 17 s)
+            # Respect eBay rate limit (~5 000 calls/day ≈ 1 per 17 s)
             time.sleep(args.delay)
 
     log.info("Done.")
