@@ -279,12 +279,283 @@ as DateTime?,
 
 
 /// @nodoc
+mixin _$EbaySubvariantPrices {
+
+ double? get psa10; double? get psa9; double? get psa8;
+/// Create a copy of EbaySubvariantPrices
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EbaySubvariantPricesCopyWith<EbaySubvariantPrices> get copyWith => _$EbaySubvariantPricesCopyWithImpl<EbaySubvariantPrices>(this as EbaySubvariantPrices, _$identity);
+
+  /// Serializes this EbaySubvariantPrices to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbaySubvariantPrices&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8);
+
+@override
+String toString() {
+  return 'EbaySubvariantPrices(psa10: $psa10, psa9: $psa9, psa8: $psa8)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EbaySubvariantPricesCopyWith<$Res>  {
+  factory $EbaySubvariantPricesCopyWith(EbaySubvariantPrices value, $Res Function(EbaySubvariantPrices) _then) = _$EbaySubvariantPricesCopyWithImpl;
+@useResult
+$Res call({
+ double? psa10, double? psa9, double? psa8
+});
+
+
+
+
+}
+/// @nodoc
+class _$EbaySubvariantPricesCopyWithImpl<$Res>
+    implements $EbaySubvariantPricesCopyWith<$Res> {
+  _$EbaySubvariantPricesCopyWithImpl(this._self, this._then);
+
+  final EbaySubvariantPrices _self;
+  final $Res Function(EbaySubvariantPrices) _then;
+
+/// Create a copy of EbaySubvariantPrices
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,}) {
+  return _then(_self.copyWith(
+psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
+as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
+as double?,psa8: freezed == psa8 ? _self.psa8 : psa8 // ignore: cast_nullable_to_non_nullable
+as double?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [EbaySubvariantPrices].
+extension EbaySubvariantPricesPatterns on EbaySubvariantPrices {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EbaySubvariantPrices value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EbaySubvariantPrices() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EbaySubvariantPrices value)  $default,){
+final _that = this;
+switch (_that) {
+case _EbaySubvariantPrices():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EbaySubvariantPrices value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EbaySubvariantPrices() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EbaySubvariantPrices() when $default != null:
+return $default(_that.psa10,_that.psa9,_that.psa8);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8)  $default,) {final _that = this;
+switch (_that) {
+case _EbaySubvariantPrices():
+return $default(_that.psa10,_that.psa9,_that.psa8);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double? psa10,  double? psa9,  double? psa8)?  $default,) {final _that = this;
+switch (_that) {
+case _EbaySubvariantPrices() when $default != null:
+return $default(_that.psa10,_that.psa9,_that.psa8);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _EbaySubvariantPrices implements EbaySubvariantPrices {
+  const _EbaySubvariantPrices({this.psa10, this.psa9, this.psa8});
+  factory _EbaySubvariantPrices.fromJson(Map<String, dynamic> json) => _$EbaySubvariantPricesFromJson(json);
+
+@override final  double? psa10;
+@override final  double? psa9;
+@override final  double? psa8;
+
+/// Create a copy of EbaySubvariantPrices
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EbaySubvariantPricesCopyWith<_EbaySubvariantPrices> get copyWith => __$EbaySubvariantPricesCopyWithImpl<_EbaySubvariantPrices>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$EbaySubvariantPricesToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbaySubvariantPrices&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8);
+
+@override
+String toString() {
+  return 'EbaySubvariantPrices(psa10: $psa10, psa9: $psa9, psa8: $psa8)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EbaySubvariantPricesCopyWith<$Res> implements $EbaySubvariantPricesCopyWith<$Res> {
+  factory _$EbaySubvariantPricesCopyWith(_EbaySubvariantPrices value, $Res Function(_EbaySubvariantPrices) _then) = __$EbaySubvariantPricesCopyWithImpl;
+@override @useResult
+$Res call({
+ double? psa10, double? psa9, double? psa8
+});
+
+
+
+
+}
+/// @nodoc
+class __$EbaySubvariantPricesCopyWithImpl<$Res>
+    implements _$EbaySubvariantPricesCopyWith<$Res> {
+  __$EbaySubvariantPricesCopyWithImpl(this._self, this._then);
+
+  final _EbaySubvariantPrices _self;
+  final $Res Function(_EbaySubvariantPrices) _then;
+
+/// Create a copy of EbaySubvariantPrices
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,}) {
+  return _then(_EbaySubvariantPrices(
+psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
+as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
+as double?,psa8: freezed == psa8 ? _self.psa8 : psa8 // ignore: cast_nullable_to_non_nullable
+as double?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$EbayGradedPrice {
 
 /// Median of PSA 10 / CGC 10 / BGS 10 / GEM MINT recent sales.
  double? get psa10;/// Median of PSA 9 / MINT 9 recent sales.
  double? get psa9;/// Median of PSA 8 / NM-MT 8 recent sales.
- double? get psa8;@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? get lastUpdated;
+ double? get psa8;@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? get lastUpdated;/// Base Set sub-variant breakdown — only populated for WotC-era cards.
+/// Keys: '1st_edition', 'shadowless', 'unlimited'
+@JsonKey(name: 'subvariants') Map<String, EbaySubvariantPrices> get subvariants;
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -297,16 +568,16 @@ $EbayGradedPriceCopyWith<EbayGradedPrice> get copyWith => _$EbayGradedPriceCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated)&&const DeepCollectionEquality().equals(other.subvariants, subvariants));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8,lastUpdated);
+int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8,lastUpdated,const DeepCollectionEquality().hash(subvariants));
 
 @override
 String toString() {
-  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, psa8: $psa8, lastUpdated: $lastUpdated)';
+  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, psa8: $psa8, lastUpdated: $lastUpdated, subvariants: $subvariants)';
 }
 
 
@@ -317,7 +588,7 @@ abstract mixin class $EbayGradedPriceCopyWith<$Res>  {
   factory $EbayGradedPriceCopyWith(EbayGradedPrice value, $Res Function(EbayGradedPrice) _then) = _$EbayGradedPriceCopyWithImpl;
 @useResult
 $Res call({
- double? psa10, double? psa9, double? psa8,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+ double? psa10, double? psa9, double? psa8,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated,@JsonKey(name: 'subvariants') Map<String, EbaySubvariantPrices> subvariants
 });
 
 
@@ -334,13 +605,14 @@ class _$EbayGradedPriceCopyWithImpl<$Res>
 
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,Object? lastUpdated = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,Object? lastUpdated = freezed,Object? subvariants = null,}) {
   return _then(_self.copyWith(
 psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
 as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
 as double?,psa8: freezed == psa8 ? _self.psa8 : psa8 // ignore: cast_nullable_to_non_nullable
 as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,subvariants: null == subvariants ? _self.subvariants : subvariants // ignore: cast_nullable_to_non_nullable
+as Map<String, EbaySubvariantPrices>,
   ));
 }
 
@@ -425,10 +697,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated, @JsonKey(name: 'subvariants')  Map<String, EbaySubvariantPrices> subvariants)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EbayGradedPrice() when $default != null:
-return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
+return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated,_that.subvariants);case _:
   return orElse();
 
 }
@@ -446,10 +718,10 @@ return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated, @JsonKey(name: 'subvariants')  Map<String, EbaySubvariantPrices> subvariants)  $default,) {final _that = this;
 switch (_that) {
 case _EbayGradedPrice():
-return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
+return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated,_that.subvariants);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -466,10 +738,10 @@ return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double? psa10,  double? psa9,  double? psa8, @JsonKey(name: 'last_updated')@TimestampConverter()  DateTime? lastUpdated, @JsonKey(name: 'subvariants')  Map<String, EbaySubvariantPrices> subvariants)?  $default,) {final _that = this;
 switch (_that) {
 case _EbayGradedPrice() when $default != null:
-return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
+return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated,_that.subvariants);case _:
   return null;
 
 }
@@ -481,7 +753,7 @@ return $default(_that.psa10,_that.psa9,_that.psa8,_that.lastUpdated);case _:
 @JsonSerializable()
 
 class _EbayGradedPrice implements EbayGradedPrice {
-  const _EbayGradedPrice({this.psa10, this.psa9, this.psa8, @JsonKey(name: 'last_updated')@TimestampConverter() this.lastUpdated});
+  const _EbayGradedPrice({this.psa10, this.psa9, this.psa8, @JsonKey(name: 'last_updated')@TimestampConverter() this.lastUpdated, @JsonKey(name: 'subvariants') final  Map<String, EbaySubvariantPrices> subvariants = const {}}): _subvariants = subvariants;
   factory _EbayGradedPrice.fromJson(Map<String, dynamic> json) => _$EbayGradedPriceFromJson(json);
 
 /// Median of PSA 10 / CGC 10 / BGS 10 / GEM MINT recent sales.
@@ -491,6 +763,17 @@ class _EbayGradedPrice implements EbayGradedPrice {
 /// Median of PSA 8 / NM-MT 8 recent sales.
 @override final  double? psa8;
 @override@JsonKey(name: 'last_updated')@TimestampConverter() final  DateTime? lastUpdated;
+/// Base Set sub-variant breakdown — only populated for WotC-era cards.
+/// Keys: '1st_edition', 'shadowless', 'unlimited'
+ final  Map<String, EbaySubvariantPrices> _subvariants;
+/// Base Set sub-variant breakdown — only populated for WotC-era cards.
+/// Keys: '1st_edition', 'shadowless', 'unlimited'
+@override@JsonKey(name: 'subvariants') Map<String, EbaySubvariantPrices> get subvariants {
+  if (_subvariants is EqualUnmodifiableMapView) return _subvariants;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_subvariants);
+}
+
 
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
@@ -505,16 +788,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EbayGradedPrice&&(identical(other.psa10, psa10) || other.psa10 == psa10)&&(identical(other.psa9, psa9) || other.psa9 == psa9)&&(identical(other.psa8, psa8) || other.psa8 == psa8)&&(identical(other.lastUpdated, lastUpdated) || other.lastUpdated == lastUpdated)&&const DeepCollectionEquality().equals(other._subvariants, _subvariants));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8,lastUpdated);
+int get hashCode => Object.hash(runtimeType,psa10,psa9,psa8,lastUpdated,const DeepCollectionEquality().hash(_subvariants));
 
 @override
 String toString() {
-  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, psa8: $psa8, lastUpdated: $lastUpdated)';
+  return 'EbayGradedPrice(psa10: $psa10, psa9: $psa9, psa8: $psa8, lastUpdated: $lastUpdated, subvariants: $subvariants)';
 }
 
 
@@ -525,7 +808,7 @@ abstract mixin class _$EbayGradedPriceCopyWith<$Res> implements $EbayGradedPrice
   factory _$EbayGradedPriceCopyWith(_EbayGradedPrice value, $Res Function(_EbayGradedPrice) _then) = __$EbayGradedPriceCopyWithImpl;
 @override @useResult
 $Res call({
- double? psa10, double? psa9, double? psa8,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated
+ double? psa10, double? psa9, double? psa8,@JsonKey(name: 'last_updated')@TimestampConverter() DateTime? lastUpdated,@JsonKey(name: 'subvariants') Map<String, EbaySubvariantPrices> subvariants
 });
 
 
@@ -542,13 +825,14 @@ class __$EbayGradedPriceCopyWithImpl<$Res>
 
 /// Create a copy of EbayGradedPrice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,Object? lastUpdated = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? psa10 = freezed,Object? psa9 = freezed,Object? psa8 = freezed,Object? lastUpdated = freezed,Object? subvariants = null,}) {
   return _then(_EbayGradedPrice(
 psa10: freezed == psa10 ? _self.psa10 : psa10 // ignore: cast_nullable_to_non_nullable
 as double?,psa9: freezed == psa9 ? _self.psa9 : psa9 // ignore: cast_nullable_to_non_nullable
 as double?,psa8: freezed == psa8 ? _self.psa8 : psa8 // ignore: cast_nullable_to_non_nullable
 as double?,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,subvariants: null == subvariants ? _self._subvariants : subvariants // ignore: cast_nullable_to_non_nullable
+as Map<String, EbaySubvariantPrices>,
   ));
 }
 
@@ -2344,7 +2628,9 @@ mixin _$CardMeta {
 
  String get name;@JsonKey(name: 'set_id') String get setId;@JsonKey(name: 'set_number') String get setNumber;@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage get language; String get variant;@JsonKey(name: 'image_url') String get imageUrl;/// Specialty classification tags (e.g. 'japanese', '1st_edition', 'error').
 /// Applied automatically by the Kaggle importer and editable in-app.
-@JsonKey(name: 'specialty_tags') List<String> get specialtyTags;
+@JsonKey(name: 'specialty_tags') List<String> get specialtyTags;/// Base Set sub-variant for WotC-era cards: '1st_edition', 'shadowless',
+/// or 'unlimited'. Null for sets that have no sub-variant distinction.
+@JsonKey(name: 'sub_variant') String? get subVariant;
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2357,16 +2643,16 @@ $CardMetaCopyWith<CardMeta> get copyWith => _$CardMetaCopyWithImpl<CardMeta>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other.specialtyTags, specialtyTags));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other.specialtyTags, specialtyTags)&&(identical(other.subVariant, subVariant) || other.subVariant == subVariant));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl,const DeepCollectionEquality().hash(specialtyTags));
+int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl,const DeepCollectionEquality().hash(specialtyTags),subVariant);
 
 @override
 String toString() {
-  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl, specialtyTags: $specialtyTags)';
+  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl, specialtyTags: $specialtyTags, subVariant: $subVariant)';
 }
 
 
@@ -2377,7 +2663,7 @@ abstract mixin class $CardMetaCopyWith<$Res>  {
   factory $CardMetaCopyWith(CardMeta value, $Res Function(CardMeta) _then) = _$CardMetaCopyWithImpl;
 @useResult
 $Res call({
- String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'specialty_tags') List<String> specialtyTags
+ String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'specialty_tags') List<String> specialtyTags,@JsonKey(name: 'sub_variant') String? subVariant
 });
 
 
@@ -2394,7 +2680,7 @@ class _$CardMetaCopyWithImpl<$Res>
 
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,Object? specialtyTags = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,Object? specialtyTags = null,Object? subVariant = freezed,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,setId: null == setId ? _self.setId : setId // ignore: cast_nullable_to_non_nullable
@@ -2403,7 +2689,8 @@ as String,language: null == language ? _self.language : language // ignore: cast
 as CardLanguage,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,specialtyTags: null == specialtyTags ? _self.specialtyTags : specialtyTags // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,subVariant: freezed == subVariant ? _self.subVariant : subVariant // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -2488,10 +2775,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags, @JsonKey(name: 'sub_variant')  String? subVariant)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CardMeta() when $default != null:
-return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags);case _:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags,_that.subVariant);case _:
   return orElse();
 
 }
@@ -2509,10 +2796,10 @@ return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.vari
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags, @JsonKey(name: 'sub_variant')  String? subVariant)  $default,) {final _that = this;
 switch (_that) {
 case _CardMeta():
-return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags);case _:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags,_that.subVariant);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2529,10 +2816,10 @@ return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.vari
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'set_id')  String setId, @JsonKey(name: 'set_number')  String setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en)  CardLanguage language,  String variant, @JsonKey(name: 'image_url')  String imageUrl, @JsonKey(name: 'specialty_tags')  List<String> specialtyTags, @JsonKey(name: 'sub_variant')  String? subVariant)?  $default,) {final _that = this;
 switch (_that) {
 case _CardMeta() when $default != null:
-return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags);case _:
+return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.variant,_that.imageUrl,_that.specialtyTags,_that.subVariant);case _:
   return null;
 
 }
@@ -2544,7 +2831,7 @@ return $default(_that.name,_that.setId,_that.setNumber,_that.language,_that.vari
 @JsonSerializable()
 
 class _CardMeta implements CardMeta {
-  const _CardMeta({required this.name, @JsonKey(name: 'set_id') required this.setId, @JsonKey(name: 'set_number') required this.setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) required this.language, required this.variant, @JsonKey(name: 'image_url') required this.imageUrl, @JsonKey(name: 'specialty_tags') final  List<String> specialtyTags = const []}): _specialtyTags = specialtyTags;
+  const _CardMeta({required this.name, @JsonKey(name: 'set_id') required this.setId, @JsonKey(name: 'set_number') required this.setNumber, @JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) required this.language, required this.variant, @JsonKey(name: 'image_url') required this.imageUrl, @JsonKey(name: 'specialty_tags') final  List<String> specialtyTags = const [], @JsonKey(name: 'sub_variant') this.subVariant}): _specialtyTags = specialtyTags;
   factory _CardMeta.fromJson(Map<String, dynamic> json) => _$CardMetaFromJson(json);
 
 @override final  String name;
@@ -2564,6 +2851,9 @@ class _CardMeta implements CardMeta {
   return EqualUnmodifiableListView(_specialtyTags);
 }
 
+/// Base Set sub-variant for WotC-era cards: '1st_edition', 'shadowless',
+/// or 'unlimited'. Null for sets that have no sub-variant distinction.
+@override@JsonKey(name: 'sub_variant') final  String? subVariant;
 
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
@@ -2578,16 +2868,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other._specialtyTags, _specialtyTags));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardMeta&&(identical(other.name, name) || other.name == name)&&(identical(other.setId, setId) || other.setId == setId)&&(identical(other.setNumber, setNumber) || other.setNumber == setNumber)&&(identical(other.language, language) || other.language == language)&&(identical(other.variant, variant) || other.variant == variant)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other._specialtyTags, _specialtyTags)&&(identical(other.subVariant, subVariant) || other.subVariant == subVariant));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl,const DeepCollectionEquality().hash(_specialtyTags));
+int get hashCode => Object.hash(runtimeType,name,setId,setNumber,language,variant,imageUrl,const DeepCollectionEquality().hash(_specialtyTags),subVariant);
 
 @override
 String toString() {
-  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl, specialtyTags: $specialtyTags)';
+  return 'CardMeta(name: $name, setId: $setId, setNumber: $setNumber, language: $language, variant: $variant, imageUrl: $imageUrl, specialtyTags: $specialtyTags, subVariant: $subVariant)';
 }
 
 
@@ -2598,7 +2888,7 @@ abstract mixin class _$CardMetaCopyWith<$Res> implements $CardMetaCopyWith<$Res>
   factory _$CardMetaCopyWith(_CardMeta value, $Res Function(_CardMeta) _then) = __$CardMetaCopyWithImpl;
 @override @useResult
 $Res call({
- String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'specialty_tags') List<String> specialtyTags
+ String name,@JsonKey(name: 'set_id') String setId,@JsonKey(name: 'set_number') String setNumber,@JsonKey(name: 'language')@JsonKey(unknownEnumValue: CardLanguage.en) CardLanguage language, String variant,@JsonKey(name: 'image_url') String imageUrl,@JsonKey(name: 'specialty_tags') List<String> specialtyTags,@JsonKey(name: 'sub_variant') String? subVariant
 });
 
 
@@ -2615,7 +2905,7 @@ class __$CardMetaCopyWithImpl<$Res>
 
 /// Create a copy of CardMeta
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,Object? specialtyTags = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? setId = null,Object? setNumber = null,Object? language = null,Object? variant = null,Object? imageUrl = null,Object? specialtyTags = null,Object? subVariant = freezed,}) {
   return _then(_CardMeta(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,setId: null == setId ? _self.setId : setId // ignore: cast_nullable_to_non_nullable
@@ -2624,7 +2914,8 @@ as String,language: null == language ? _self.language : language // ignore: cast
 as CardLanguage,variant: null == variant ? _self.variant : variant // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,specialtyTags: null == specialtyTags ? _self._specialtyTags : specialtyTags // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,subVariant: freezed == subVariant ? _self.subVariant : subVariant // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

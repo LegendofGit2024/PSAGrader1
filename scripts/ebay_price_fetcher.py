@@ -245,8 +245,17 @@ def build_query(
     """
     parts: list[str] = []
 
-    if set_name:
-        parts.append(set_name.strip())
+    # Normalise raw set ID (e.g. "base1") to a human-readable name so the
+    # eBay query uses "Base Set" rather than the API code.
+    resolved_set = _SET_ID_TO_NAME.get(set_name.strip(), set_name.strip())
+    if resolved_set:
+        # Quote-wrap the set name so eBay treats it as an exact phrase.
+        parts.append(f'"{resolved_set}"')
+        # Append set-specific exclusions to prevent cross-set contamination.
+        excl = _SET_EXCLUSIONS.get(resolved_set, "")
+        if excl:
+            parts.append(excl)
+
     parts.append(card_name.strip())
     if number:
         parts.append(number.strip())
@@ -301,8 +310,14 @@ def build_graded_query(
     so eBay sees them as must-include context.
     """
     parts: list[str] = []
-    if set_name:
-        parts.append(set_name.strip())
+
+    resolved_set = _SET_ID_TO_NAME.get(set_name.strip(), set_name.strip())
+    if resolved_set:
+        parts.append(f'"{resolved_set}"')
+        excl = _SET_EXCLUSIONS.get(resolved_set, "")
+        if excl:
+            parts.append(excl)
+
     parts.append(card_name.strip())
     if number:
         parts.append(number.strip())
@@ -403,8 +418,9 @@ def fetch_graded_with_fallback(
     """
     Two-tier graded fetch.
 
-    Tier 1: "{set} {name} {number} PSA 10 -lot -bundle -digital"
-    Tier 2: "{set} {name} {number} graded  -lot -bundle -digital"  (if tier 1 = 0)
+    Tier 1: '"{set}" {exclusions} {name} {number} PSA 10 -lot -bundle -digital'
+    Tier 2: '"{set}" {exclusions} {name} {number} graded  -lot -bundle -digital'
+            (tried only when tier 1 returns 0 results)
 
     Returns (items, query_used, tier_used).
     """
@@ -457,29 +473,57 @@ def extract_prices(items: list[dict]) -> list[float]:
 
 
 def extract_graded_prices(
-    items:   list[dict],
-    verbose: bool = True,
-) -> dict[str, list[float]]:
+    items:    list[dict],
+    verbose:  bool = True,
+    set_name: str  = "",
+) -> dict:
     """
     Score each eBay item title using the grade hierarchy and bucket prices.
 
     Rules:
+    - validate_set_in_title() discards titles contaminated by rival sets
+      (e.g. "Base Set 2" results when fetching for "Base Set").
     - Each title is classified by classify_title() — first regex match wins.
-    - 'other' titles (company present, grade unclear) are DISCARDED — never
-      allowed to pollute psa10.
+    - 'other' titles (company present, grade unclear) are DISCARDED.
     - None titles (no grading company) are DISCARDED.
     - Shipping is stripped from every price before bucketing.
+    - detect_base_set_subvariant() labels each result as 1st_edition,
+      shadowless, or unlimited for the Base Set sub-variant breakdown.
 
     Returns:
-        {'psa10': [...], 'psa9': [...], 'psa8': [...], 'other': [...]}
+        {
+          'psa10': [...], 'psa9': [...], 'psa8': [...], 'other': [...],
+          'subvariants': {
+              '1st_edition': {'psa10': [...], 'psa9': [...], 'psa8': [...]},
+              'shadowless':  {'psa10': [...], 'psa9': [...], 'psa8': [...]},
+              'unlimited':   {'psa10': [...], 'psa9': [...], 'psa8': [...]},
+          }
+        }
         All lists are newest-first (API sort: newlyListed).
     """
-    buckets: dict[str, list[float]] = {
-        "psa10": [], "psa9": [], "psa8": [], "other": []
+    buckets: dict = {
+        "psa10": [], "psa9": [], "psa8": [], "other": [],
+        "subvariants": {
+            "1st_edition": {"psa10": [], "psa9": [], "psa8": []},
+            "shadowless":  {"psa10": [], "psa9": [], "psa8": []},
+            "unlimited":   {"psa10": [], "psa9": [], "psa8": []},
+        },
     }
+
+    # Resolve raw set ID to human name so blocklist lookup works consistently.
+    resolved_set = _SET_ID_TO_NAME.get(set_name.strip(), set_name.strip())
 
     for item in items:
         title  = item.get("title", "").strip()
+
+        # ── Set contamination guard ────────────────────────────────────────
+        if resolved_set and not validate_set_in_title(title, resolved_set):
+            if verbose:
+                print(f'  DISCARD (wrong set "{resolved_set}"): "{title[:70]}"')
+            else:
+                log.debug("DISCARD (wrong set %s): %s", resolved_set, title[:70])
+            continue
+
         bucket = classify_title(title)
 
         # ── Hard discard ─────────────────────────────────────────────────
@@ -515,6 +559,11 @@ def extract_graded_prices(
 
         buckets[bucket].append(net)
 
+        # ── Sub-variant detection ─────────────────────────────────────────
+        subvariant = detect_base_set_subvariant(title)
+        if bucket in buckets["subvariants"].get(subvariant, {}):
+            buckets["subvariants"][subvariant][bucket].append(net)
+
         # ── Real-time classification printout ────────────────────────────
         if verbose:
             label_map = {
@@ -522,8 +571,13 @@ def extract_graded_prices(
                 "psa9":  "PSA 9",
                 "psa8":  "PSA 8",
             }
+            sv_label = {
+                "1st_edition": "  [1st Edition]",
+                "shadowless":  "  [Shadowless]",
+                "unlimited":   "",
+            }.get(subvariant, "")
             print(f'  Found: "{title[:75]}"')
-            print(f"  -> Classified as: {label_map.get(bucket, bucket)}")
+            print(f"  -> Classified as: {label_map.get(bucket, bucket)}{sv_label}")
             print(f"  -> Price: ${net:,.2f}")
             print(f"  {'-'*50}")
 
@@ -567,15 +621,19 @@ def update_firestore_raw(
 
 def update_firestore_graded(
     db,
-    card_id:    str,
-    psa10:      float | None,
-    psa9:       float | None,
-    psa8:       float | None = None,
-    collection: str = "cards",
+    card_id:     str,
+    psa10:       float | None,
+    psa9:        float | None,
+    psa8:        float | None = None,
+    collection:  str = "cards",
+    subvariants: dict | None = None,
 ) -> None:
     """
     Write pricing.ebay_us.graded.{psa10, psa9, psa8, last_updated} to Firestore.
     Only writes fields that have a value — preserves any existing fields.
+
+    If subvariants is provided (from extract_graded_prices), also writes:
+        pricing.ebay_us.graded.subvariants.{1st_edition,shadowless,unlimited}.{psa10,psa9,psa8}
     """
     from google.cloud.firestore_v1 import SERVER_TIMESTAMP  # type: ignore
 
@@ -586,6 +644,20 @@ def update_firestore_graded(
         graded["psa9"]  = round(psa9,  2)
     if psa8 is not None:
         graded["psa8"]  = round(psa8,  2)
+
+    # Sub-variant breakdown (Base Set: 1st edition / shadowless / unlimited)
+    if subvariants:
+        sv_map: dict = {}
+        for variant_key, grade_prices in subvariants.items():
+            sv_entry: dict = {}
+            for grade_key, prices in grade_prices.items():
+                med = median_of_last_n(prices)
+                if med is not None:
+                    sv_entry[grade_key] = round(med, 2)
+            if sv_entry:
+                sv_map[variant_key] = sv_entry
+        if sv_map:
+            graded["subvariants"] = sv_map
 
     ref = db.collection(collection).document(card_id)
     ref.set({"pricing": {"ebay_us": {"graded": graded}}}, merge=True)
@@ -691,7 +763,7 @@ def enrich_with_ebay_price(
             name, set_id, number, client_id, client_secret, tags
         )
         log.debug("eBay graded (tier %d): %s", tier, graded_q)
-        buckets = extract_graded_prices(items, verbose=False)
+        buckets = extract_graded_prices(items, verbose=False, set_name=set_id)
         psa10   = median_of_last_n(buckets["psa10"])
         psa9    = median_of_last_n(buckets["psa9"])
         psa8    = median_of_last_n(buckets["psa8"])
@@ -702,6 +774,18 @@ def enrich_with_ebay_price(
             graded["psa9"]  = round(psa9,  2)
         if psa8 is not None:
             graded["psa8"]  = round(psa8,  2)
+        # Sub-variant breakdown (populated when set_id is Base Set / WotC era)
+        sv_map: dict = {}
+        for variant_key, grade_prices in buckets.get("subvariants", {}).items():
+            sv_entry: dict = {}
+            for grade_key, prices in grade_prices.items():
+                med = median_of_last_n(prices)
+                if med is not None:
+                    sv_entry[grade_key] = round(med, 2)
+            if sv_entry:
+                sv_map[variant_key] = sv_entry
+        if sv_map:
+            graded["subvariants"] = sv_map
         ebay["graded"] = graded
         log.info(
             "  %-34s  PSA10=%s  PSA9=%s  PSA8=%s  (tier %d)",
@@ -782,6 +866,83 @@ _SET_ID_TO_NAME: dict[str, str] = {
     "sv6":      "Twilight Masquerade",
     "sv7":      "Stellar Crown",
 }
+
+
+# ---------------------------------------------------------------------------
+# Set contamination — exclusions and title validation
+# ---------------------------------------------------------------------------
+
+# When searching for a specific set, append these exclusion terms so eBay
+# doesn't return cards from other sets that share the same card number.
+_SET_EXCLUSIONS: dict[str, str] = {
+    "Base Set":             '-"Base Set 2" -"Legendary Collection" -LC',
+    "Base Set 2":           '-"Legendary Collection" -"Team Rocket"',
+    "Legendary Collection": '-"Base Set 2" -"Base Set"',
+    "Team Rocket":          '-"Base Set" -"Base Set 2" -"Legendary Collection"',
+    "Jungle":               '-"Base Set" -"Fossil"',
+    "Fossil":               '-"Jungle" -"Base Set"',
+}
+
+# After fetching, discard any eBay title that contains these phrases for the
+# given set — catches listings that slip past the query exclusions.
+_SET_TITLE_BLOCKLIST: dict[str, list[str]] = {
+    "Base Set": [
+        "base set 2",
+        "legendary collection",
+        "legendary coll",
+        " lc ",          # "LC" abbreviation surrounded by spaces
+    ],
+    "Base Set 2": [
+        "legendary collection",
+    ],
+}
+
+
+def validate_set_in_title(title: str, set_name: str) -> bool:
+    """
+    Return True only if the title is NOT contaminated by a rival set.
+
+    Call this after fetching eBay results to discard cross-set pollution
+    that slipped past the query exclusions.
+    """
+    blocklist = _SET_TITLE_BLOCKLIST.get(set_name, [])
+    title_lower = title.lower()
+    for phrase in blocklist:
+        if phrase.lower() in title_lower:
+            return False
+    return True
+
+
+# ---------------------------------------------------------------------------
+# Base Set sub-variant detection
+# ---------------------------------------------------------------------------
+
+_1ST_EDITION_RE = re.compile(
+    r'\b1st\s*(?:edition|ed\.?)\b',
+    re.IGNORECASE,
+)
+_SHADOWLESS_RE = re.compile(
+    r'\bshadowless\b',
+    re.IGNORECASE,
+)
+
+
+def detect_base_set_subvariant(title: str) -> str:
+    """
+    Detect the Base Set sub-variant printed in an eBay listing title.
+
+    Returns:
+        '1st_edition'  — title contains "1st Edition" / "1st Ed"
+        'shadowless'   — title contains "Shadowless"
+        'unlimited'    — neither marker found (standard unlimited print)
+
+    Only meaningful for Base Set / early WotC-era cards.
+    """
+    if _1ST_EDITION_RE.search(title):
+        return '1st_edition'
+    if _SHADOWLESS_RE.search(title):
+        return 'shadowless'
+    return 'unlimited'
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -909,7 +1070,7 @@ def _process_single(
             )
             print(f"  Query used (tier {tier}): {graded_q}")
             # verbose=True → prints classification for each item in real-time
-            buckets = extract_graded_prices(items, verbose=True)
+            buckets = extract_graded_prices(items, verbose=True, set_name=set_id)
             psa10   = median_of_last_n(buckets["psa10"])
             psa9    = median_of_last_n(buckets["psa9"])
             psa8    = median_of_last_n(buckets["psa8"])
@@ -919,9 +1080,27 @@ def _process_single(
             print(f"  PSA9  median : {'$'+f'{psa9:.2f}'  if psa9  else 'N/A'}  ({len(buckets['psa9'])} sales)")
             print(f"  PSA8  median : {'$'+f'{psa8:.2f}'  if psa8  else 'N/A'}  ({len(buckets['psa8'])} sales)")
             print(f"  Discarded    : {len(buckets['other'])} titles (grade unclear)")
+            # Sub-variant breakdown (non-empty only)
+            sv = buckets.get("subvariants", {})
+            has_sv = any(
+                any(prices for prices in gp.values())
+                for gp in sv.values()
+            )
+            if has_sv:
+                print(f"  ── Sub-variant Breakdown ──────────────────────────")
+                for sv_key, gp in sv.items():
+                    sv_label = {"1st_edition": "1st Edition", "shadowless": "Shadowless", "unlimited": "Unlimited"}.get(sv_key, sv_key)
+                    p10 = median_of_last_n(gp.get("psa10", []))
+                    p9  = median_of_last_n(gp.get("psa9",  []))
+                    p8  = median_of_last_n(gp.get("psa8",  []))
+                    if p10 or p9 or p8:
+                        print(f"  {sv_label:14} PSA10={'$'+f'{p10:.2f}' if p10 else 'N/A':<10}  PSA9={'$'+f'{p9:.2f}' if p9 else 'N/A':<10}  PSA8={'$'+f'{p8:.2f}' if p8 else 'N/A'}")
             if psa10 or psa9 or psa8:
                 if not dry_run:
-                    update_firestore_graded(db, card_id, psa10, psa9, psa8, collection)
+                    update_firestore_graded(
+                        db, card_id, psa10, psa9, psa8, collection,
+                        subvariants=buckets.get("subvariants"),
+                    )
             else:
                 print("  No graded results on either tier")
                 if not dry_run:

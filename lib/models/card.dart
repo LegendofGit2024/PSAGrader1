@@ -26,6 +26,20 @@ abstract class EbayRawPrice with _$EbayRawPrice {
       _$EbayRawPriceFromJson(json);
 }
 
+/// Per-sub-variant grade prices for Base Set / WotC-era cards.
+/// Stored under pricing.ebay_us.graded.subvariants.{1st_edition,shadowless,unlimited}
+@freezed
+abstract class EbaySubvariantPrices with _$EbaySubvariantPrices {
+  const factory EbaySubvariantPrices({
+    double? psa10,
+    double? psa9,
+    double? psa8,
+  }) = _EbaySubvariantPrices;
+
+  factory EbaySubvariantPrices.fromJson(Map<String, dynamic> json) =>
+      _$EbaySubvariantPricesFromJson(json);
+}
+
 /// Graded (slabbed) eBay sold prices — written by ebay_price_fetcher.py
 @freezed
 abstract class EbayGradedPrice with _$EbayGradedPrice {
@@ -37,6 +51,10 @@ abstract class EbayGradedPrice with _$EbayGradedPrice {
     /// Median of PSA 8 / NM-MT 8 recent sales.
     double? psa8,
     @JsonKey(name: 'last_updated') @TimestampConverter() DateTime? lastUpdated,
+    /// Base Set sub-variant breakdown — only populated for WotC-era cards.
+    /// Keys: '1st_edition', 'shadowless', 'unlimited'
+    @JsonKey(name: 'subvariants')
+    @Default({}) Map<String, EbaySubvariantPrices> subvariants,
   }) = _EbayGradedPrice;
 
   factory EbayGradedPrice.fromJson(Map<String, dynamic> json) =>
@@ -146,6 +164,9 @@ abstract class CardMeta with _$CardMeta {
     /// Specialty classification tags (e.g. 'japanese', '1st_edition', 'error').
     /// Applied automatically by the Kaggle importer and editable in-app.
     @JsonKey(name: 'specialty_tags') @Default([]) List<String> specialtyTags,
+    /// Base Set sub-variant for WotC-era cards: '1st_edition', 'shadowless',
+    /// or 'unlimited'. Null for sets that have no sub-variant distinction.
+    @JsonKey(name: 'sub_variant') String? subVariant,
   }) = _CardMeta;
 
   factory CardMeta.fromJson(Map<String, dynamic> json) =>

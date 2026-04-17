@@ -18,12 +18,36 @@ Map<String, dynamic> _$EbayRawPriceToJson(_EbayRawPrice instance) =>
       'last_updated': const TimestampConverter().toJson(instance.lastUpdated),
     };
 
+_EbaySubvariantPrices _$EbaySubvariantPricesFromJson(
+  Map<String, dynamic> json,
+) => _EbaySubvariantPrices(
+  psa10: (json['psa10'] as num?)?.toDouble(),
+  psa9: (json['psa9'] as num?)?.toDouble(),
+  psa8: (json['psa8'] as num?)?.toDouble(),
+);
+
+Map<String, dynamic> _$EbaySubvariantPricesToJson(
+  _EbaySubvariantPrices instance,
+) => <String, dynamic>{
+  'psa10': instance.psa10,
+  'psa9': instance.psa9,
+  'psa8': instance.psa8,
+};
+
 _EbayGradedPrice _$EbayGradedPriceFromJson(Map<String, dynamic> json) =>
     _EbayGradedPrice(
       psa10: (json['psa10'] as num?)?.toDouble(),
       psa9: (json['psa9'] as num?)?.toDouble(),
       psa8: (json['psa8'] as num?)?.toDouble(),
       lastUpdated: const TimestampConverter().fromJson(json['last_updated']),
+      subvariants:
+          (json['subvariants'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              EbaySubvariantPrices.fromJson(e as Map<String, dynamic>),
+            ),
+          ) ??
+          const {},
     );
 
 Map<String, dynamic> _$EbayGradedPriceToJson(_EbayGradedPrice instance) =>
@@ -32,6 +56,7 @@ Map<String, dynamic> _$EbayGradedPriceToJson(_EbayGradedPrice instance) =>
       'psa9': instance.psa9,
       'psa8': instance.psa8,
       'last_updated': const TimestampConverter().toJson(instance.lastUpdated),
+      'subvariants': instance.subvariants,
     };
 
 _EbayUsPricing _$EbayUsPricingFromJson(Map<String, dynamic> json) =>
@@ -158,6 +183,7 @@ _CardMeta _$CardMetaFromJson(Map<String, dynamic> json) => _CardMeta(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  subVariant: json['sub_variant'] as String?,
 );
 
 Map<String, dynamic> _$CardMetaToJson(_CardMeta instance) => <String, dynamic>{
@@ -168,6 +194,7 @@ Map<String, dynamic> _$CardMetaToJson(_CardMeta instance) => <String, dynamic>{
   'variant': instance.variant,
   'image_url': instance.imageUrl,
   'specialty_tags': instance.specialtyTags,
+  'sub_variant': instance.subVariant,
 };
 
 const _$CardLanguageEnumMap = {
