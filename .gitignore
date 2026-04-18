@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase service account keys — NEVER commit these
+service-account.json
+*-service-account.json
+firebase-adminsdk*.json
