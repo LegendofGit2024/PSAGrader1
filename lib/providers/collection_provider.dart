@@ -63,10 +63,28 @@ Future<CardDocument?> resolvedCard(Ref ref, String cardId) =>
 // ---------------------------------------------------------------------------
 
 /// Best available market price for a single item given its condition.
+///
+/// Priority order:
+///   Slab  → graded.psa10 → graded.psa9 → graded.psa8
+///           → raw.lastSold → legacy lastSoldNm
+///   Raw   → raw.lastSold → TCGPlayer by condition → legacy lastSoldNm
 double? itemMarketValue(CollectionItem item, CardDocument card) {
+  final ebay = card.pricing.ebayUs;
+
   if (item.condition.type == ConditionType.slab) {
-    return card.pricing.ebayUs?.lastSoldNm;
+    // Use the most relevant graded price for the slab's grade
+    final graded = ebay?.graded;
+    return graded?.psa10
+        ?? graded?.psa9
+        ?? graded?.psa8
+        ?? ebay?.raw?.lastSold
+        ?? ebay?.lastSoldNm;
   }
+
+  // Raw card — prefer live eBay raw median, then TCGPlayer by condition
+  final rawPrice = ebay?.raw?.lastSold ?? ebay?.lastSoldNm;
+  if (rawPrice != null) return rawPrice;
+
   final cond = item.condition.rawCondition;
   final p = card.pricing.tcgplayerUs;
   if (p == null || cond == null) return null;
