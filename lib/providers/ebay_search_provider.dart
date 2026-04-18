@@ -101,12 +101,12 @@ class EbaySearchSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchActive = ref.watch(ebaySearchActiveProvider(card.id));
-    final triggerState = ref.watch(ebaySearchNotifierProvider(card.id));
+    final triggerState = ref.watch(ebaySearchProvider(card.id));
     final svc          = ref.watch(ebaySearchServiceProvider);
 
     // Show error as a snackbar once
     ref.listen<EbaySearchState>(
-      ebaySearchNotifierProvider(card.id),
+      ebaySearchProvider(card.id),
       (_, next) {
         if (next is EbaySearchError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +133,7 @@ class EbaySearchSection extends ConsumerWidget {
           disabled: !svc.canSearch,
           remaining: svc.remainingSearches,
           onTap: () => ref
-              .read(ebaySearchNotifierProvider(card.id).notifier)
+              .read(ebaySearchProvider(card.id).notifier)
               .trigger(card),
         );
       },
