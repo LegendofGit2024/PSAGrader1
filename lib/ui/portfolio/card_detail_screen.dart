@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/card.dart';
 import '../../models/collection_item.dart';
 import '../../providers/collection_provider.dart';
+import '../../providers/ebay_search_provider.dart';
 import '../../services/price_link_utility.dart';
 import '../theme/app_theme.dart';
 import 'widgets/slab_card_tile.dart';
@@ -205,6 +206,10 @@ class _CardBody extends StatelessWidget {
 
             // Live Price Check button
             _LivePriceCheckButton(card: card),
+            const SizedBox(height: 12),
+
+            // eBay on-demand fetch button / spinner
+            EbaySearchSection(card: card),
             const SizedBox(height: 20),
 
             // eBay Raw vs Graded split pricing
